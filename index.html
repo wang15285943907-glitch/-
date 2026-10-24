@@ -310,6 +310,20 @@
     function P(key){return {kind:"P",key:key};}
     function V(key){return {kind:"V",key:key};}
     function A(kind,value){return {kind:kind,value:value};}
+    function producerOps(count,mode){
+      const ops=[];
+      for(let i=0;i<count;i++){
+        ops.push.apply(ops,mode==="danger"
+          ? [P("mutex"),P("empty"),A("put"),V("mutex"),V("full")]
+          : [P("empty"),P("mutex"),A("put"),V("mutex"),V("full")]);
+      }
+      return ops;
+    }
+    function consumerOps(count){
+      const ops=[];
+      for(let i=0;i<count;i++)ops.push(P("full"),P("mutex"),A("get"),V("mutex"),V("empty"));
+      return ops;
+    }
     function batchOps(){
       const ops=[P("batchLock")];
       for(let i=0;i<3;i++) ops.push(P("full"),P("bufferLock"),A("get"),V("bufferLock"),V("empty"));
@@ -325,16 +339,13 @@
           capacity:2,initial:[],goods:["🍑","🍐","🌰","🍑","🍐"],
           sem:{empty:2,full:0,mutex:1},
           actors:[
-            {id:"producer",name:"采果人 · 生产者",icon:"🧑‍🌾",loop:true,ops:[P("empty"),P("mutex"),A("put"),V("mutex"),V("full")]},
-            {id:"consumer",name:"摆渡人 · 消费者",icon:"🦦",loop:true,ops:[P("full"),P("mutex"),A("get"),V("mutex"),V("empty")]}
+            {id:"producer",name:"采果人 · 生产者",icon:"🧑‍🌾",loop:false,ops:producerOps(3,"safe")},
+            {id:"consumer",name:"摆渡人 · 消费者",icon:"🦦",loop:false,ops:consumerOps(3)}
           ],
           lesson:"生产者先 P(empty) 确认有空位，再 P(mutex) 写入；消费者先 P(full) 确认有产品，再进入临界区。离开临界区后 V(mutex)，最后 V 对应资源量。"
         };
       }
       if(index===1){
-        const producerOps = mode==="safe"
-          ? [P("empty"),P("mutex"),A("put"),V("mutex"),V("full")]
-          : [P("mutex"),P("empty"),A("put"),V("mutex"),V("full")];
         return {
           title:"满仓险路",tag:"死锁观察 · 持锁等待",
           desc:"山门已经塞满一件货。试着让生产者先拿锁再等空位，看看消费者能不能进去腾出位置；再重开一次，用安全顺序把路疏通。",
@@ -342,8 +353,8 @@
           capacity:1,initial:["货物已在仓"],goods:["📦","📦"],
           sem:{empty:0,full:1,mutex:1},
           actors:[
-            {id:"producer",name:"补货人 · 生产者",icon:"🧑‍🌾",loop:true,ops:producerOps},
-            {id:"consumer",name:"搬运人 · 消费者",icon:"🦦",loop:true,ops:[P("full"),P("mutex"),A("get"),V("mutex"),V("empty")]}
+            {id:"producer",name:"补货人 · 生产者",icon:"🧑‍🌾",loop:false,ops:producerOps(1,mode)},
+            {id:"consumer",name:"搬运人 · 消费者",icon:"🦦",loop:false,ops:consumerOps(1)}
           ],
           lesson:"死锁不是“两个进程一起动”，而是资源等待绕成了圈。危险顺序把 mutex 拿在手里再等待 empty，消费者需要 mutex 才能取货并产生空位。"
         };
@@ -352,7 +363,7 @@
         return {
           title:"批次行商",tag:"2014 真题考点改编 · 整批互斥",
           desc:"六件货已装进驿站。甲、乙两位行商各要连续取三件；试着先让两人都申请批次锁，再看谁能整批通行。",
-          objective:"让一位行商完整取完 3 件",hint:"batchLock 管整批消费者；bufferLock 只保护每一次取放。",
+          objective:"两位行商各完整取完一批",hint:"batchLock 管整批消费者；bufferLock 只保护每一次取放。",
           capacity:6,initial:["🍑","🍐","🌰","🍑","🍐","🌰"],goods:["🍑","🍐","🌰","🍑","🍐","🌰"],
           sem:{empty:0,full:6,bufferLock:1,batchLock:1},
           actors:[
@@ -596,15 +607,15 @@
         if(!game.seenDeadlock)return {n:0,total:2,label:"步骤 1 / 2 · 观察死锁"};
         return {n:1+(game.settledDeliveries?1:0),total:2,label:game.settledDeliveries?"步骤 2 / 2 · 已疏通":"步骤 2 / 2 · 安全送货"};
       }
-      if(currentLevel===2)return {n:Math.min(game.batches,1),total:1};
+      if(currentLevel===2)return {n:Math.min(game.batches,2),total:2};
       if(currentLevel===3)return {n:Math.min(game.read,1),total:1};
       return {n:Math.min(game.modified,2),total:2};
     }
     function checkGoal(){
       let done=false;
-      if(currentLevel===0)done=game.settledDeliveries>=3;
-      else if(currentLevel===1)done=game.seenDeadlock&&game.mode==="safe"&&game.settledDeliveries>=1;
-      else if(currentLevel===2)done=game.batches>=1;
+      if(currentLevel===0)done=game.settledDeliveries>=3&&game.actors.every(function(actor){return actor.status==="done";});
+      else if(currentLevel===1)done=game.seenDeadlock&&game.mode==="safe"&&game.settledDeliveries>=1&&game.actors.every(function(actor){return actor.status==="done";});
+      else if(currentLevel===2)done=game.batches>=2&&game.actors.every(function(actor){return actor.status==="done";});
       else if(currentLevel===3)done=game.read>=1;
       else done=game.modified>=2&&game.actors.every(function(actor){return actor.status==="done";});
       if(done&&!game.won){
