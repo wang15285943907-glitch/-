@@ -347,9 +347,9 @@
         '<h1>这题的 PV 思路，你已经走通了。</h1>' +
         '<p class="complete-copy">下次遇到同步互斥大题，先分进程，再逐个写动作和 PV，最后定初值、查等待和死锁。顺序清楚了，信号量就不容易乱。</p>' +
         '<div class="code-grid"><article class="code-card"><div class="code-label">生产者</div><pre><code>' +
-        'while (1) {\\n  produce();\\n  P(empty); P(mutex);\\n  put();\\n  V(mutex); V(full);\\n}' +
+        'while (1) {\n  produce();\n  P(empty); P(mutex);\n  put();\n  V(mutex); V(full);\n}' +
         '</code></pre></article><article class="code-card"><div class="code-label">消费者</div><pre><code>' +
-        'while (1) {\\n  P(full); P(mutex);\\n  get();\\n  V(mutex); V(empty);\\n  consume();\\n}' +
+        'while (1) {\n  P(full); P(mutex);\n  get();\n  V(mutex); V(empty);\n  consume();\n}' +
         '</code></pre></article></div>' +
         '<div class="initials"><strong>初值：</strong><code>mutex=1</code><code>empty=N</code><code>full=0</code></div>' +
         '<div class="complete-actions"><button type="button" class="btn btn-primary" data-restart>↺ 再闯一轮</button>' +
