@@ -615,6 +615,7 @@
       const actor=game.actors.find(function(item){return item.id===id;});
       if(!actor||actor.status!=="ready")return;
       if(game.auto&&!fromAuto)stopAuto();
+      if(!fromAuto){autoCursor=game.actors.findIndex(function(item){return item.id===actor.id;})+1;}
       undoStack.push(JSON.parse(JSON.stringify(game)));
       if(undoStack.length>80)undoStack.shift();
       const op=nextOp(actor);
