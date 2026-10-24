@@ -853,7 +853,7 @@
       if(game.config.resourceView==="forks"){
         const keys=Object.keys(game.sem).filter(function(key){return /^fork\d+$/.test(key);});
         const labelByActor={};
-        game.actors.forEach(function(actor){labelByActor[actor.id]=actor.id.replace("philosopher","")+"号侠客";});
+        game.actors.forEach(function(actor){labelByActor[actor.id]=(Number(actor.id.replace("philosopher",""))+1)+"号侠客";});
         grid.innerHTML='<div class="fork-table">'+keys.map(function(key){
           const owner=game.owners[key];
           return '<div class="fork-token '+(owner?"held":"")+'">'+(owner?"✊":"🥢")+'<small>'+key.replace("fork","")+" 号"+(owner?" · "+esc(labelByActor[owner]||"占用"):" · 空闲")+'</small></div>';
