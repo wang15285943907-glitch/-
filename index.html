@@ -3,975 +3,752 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0a2023">
-  <title>青岚山水行记｜信号量修炼场</title>
+  <meta name="theme-color" content="#071d21">
+  <title>青岚并发山谷｜同步互斥动画游戏</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --ink:#07191d; --ink2:#0b2528; --pine:#123a36; --pine2:#1d524a;
-      --river:#183d50; --river2:#23566a; --jade:#72c9b0; --jade2:#a8e2cf;
-      --blue:#83bdca; --mist:#cadbd3; --paper:#eee2c6; --gold:#e8bd78;
-      --text:#edf4ee; --muted:#9db5ad; --line:rgba(188,222,209,.15);
-      --panel:rgba(12,35,37,.84); --panel2:rgba(17,48,49,.78);
-      --good:#85d8ad; --bad:#f19a91;
+    :root{
+      color-scheme:dark;
+      --night:#071d21;--deep:#0a292c;--pine:#123d38;--pine2:#1d5b4e;
+      --river:#164257;--jade:#79d2b2;--jade2:#b9f0d5;--mist:#cddbd0;
+      --blue:#80c8dc;--gold:#eac27c;--ink:#eaf4ec;--muted:#9ab7ad;
+      --line:rgba(190,229,211,.16);--good:#8fe0b0;--bad:#f39b92;
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
     body{
-      margin:0; min-height:100vh; color:var(--text);
-      background:
-        radial-gradient(ellipse at 12% 0%,rgba(43,103,82,.28),transparent 38rem),
-        radial-gradient(ellipse at 91% 24%,rgba(38,99,123,.2),transparent 36rem),
-        linear-gradient(155deg,#07191d 0%,#0a2025 48%,#0a1c21 100%);
-      font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      margin:0;min-height:100vh;color:var(--ink);
+      background:radial-gradient(ellipse at 10% -10%,rgba(51,123,88,.25),transparent 40rem),
+        radial-gradient(ellipse at 95% 15%,rgba(28,98,126,.23),transparent 36rem),
+        linear-gradient(155deg,#06191e,#0a2529 54%,#071b21);
+      font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
     }
     button{font:inherit}
-    button:focus-visible,a:focus-visible{outline:3px solid rgba(114,201,176,.65);outline-offset:3px}
-    .shell{width:min(1240px,calc(100% - 36px));margin:auto;padding:20px 0 42px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:26px}
-    .brand{display:flex;align-items:center;gap:12px;min-width:max-content;color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.03em}
-    .brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(114,201,176,.42);border-radius:15px;background:linear-gradient(145deg,rgba(114,201,176,.2),rgba(35,86,106,.24));color:var(--jade2);box-shadow:0 8px 30px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.12);font:800 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
-    .brand small{display:block;margin-top:3px;color:#89aaa0;font-size:9px;font-weight:600;letter-spacing:.18em}
-    .nav{display:flex;align-items:center;gap:5px;padding:5px;border:1px solid var(--line);border-radius:15px;background:rgba(3,18,22,.46);box-shadow:inset 0 1px rgba(255,255,255,.035)}
-    .nav-link{border:1px solid transparent;border-radius:10px;padding:9px 12px;background:transparent;color:#a8bbb4;font-size:12px;font-weight:700;cursor:pointer;transition:.18s ease}
-    .nav-link:hover{color:white;background:rgba(255,255,255,.05)}
-    .nav-link.active{border-color:rgba(114,201,176,.22);background:linear-gradient(135deg,rgba(114,201,176,.16),rgba(35,86,106,.16));color:#c3efdd;box-shadow:0 5px 16px rgba(0,0,0,.16)}
-    .profile{display:flex;align-items:center;gap:9px;min-width:max-content;color:#a9c2b9;font-size:11px}
-    .profile-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid rgba(131,189,202,.35);background:rgba(35,86,106,.28);color:var(--blue);font-weight:800}
-    .page{animation:fadein .28s ease}
-    @keyframes fadein{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-    .panel{border:1px solid var(--line);border-radius:23px;background:linear-gradient(145deg,rgba(20,55,51,.82),rgba(11,34,39,.91));box-shadow:0 22px 58px rgba(0,0,0,.24),inset 0 1px rgba(229,248,235,.055);backdrop-filter:blur(16px)}
-    .hero{position:relative;isolation:isolate;overflow:hidden;min-height:290px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(24px,5vw,52px);border:1px solid rgba(147,210,184,.19);border-radius:29px;background:linear-gradient(112deg,rgba(9,35,34,.96) 4%,rgba(14,53,52,.86) 56%,rgba(19,58,69,.66));box-shadow:0 28px 80px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.1)}
-    .hero-copy{position:relative;z-index:2;max-width:640px}
-    .eyebrow{display:flex;align-items:center;gap:9px;margin:0 0 12px;color:var(--jade);font-size:10px;font-weight:850;letter-spacing:.2em}
-    .eyebrow-mark{width:8px;height:8px;border-radius:50%;background:var(--jade);box-shadow:0 0 14px rgba(114,201,176,.8)}
-    h1,h2,h3,p{margin-top:0}
-    h1{margin-bottom:12px;color:#f0f5e9;font-size:clamp(31px,5.3vw,55px);line-height:1.08;letter-spacing:-.045em;text-shadow:0 3px 25px rgba(0,0,0,.25)}
-    .hero p{max-width:570px;margin-bottom:23px;color:#bdd0c6;font-size:14px;line-height:1.9}
-    .hero-art{position:absolute;z-index:1;inset:0 0 0 auto;width:min(68%,760px);height:100%;opacity:.88;pointer-events:none;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.5) 18%,black 55%)}
-    .hero-art svg{width:100%;height:100%}
-    .hero-stats{position:relative;z-index:2;display:grid;gap:10px;min-width:166px}
-    .hero-stat{padding:12px 15px;border:1px solid rgba(200,228,208,.14);border-radius:15px;background:rgba(5,24,28,.55);box-shadow:0 12px 24px rgba(0,0,0,.12);backdrop-filter:blur(7px)}
-    .hero-stat span{display:block;color:#90aaa1;font-size:10px}
-    .hero-stat strong{display:block;margin-top:3px;color:#e5f3e9;font-size:18px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:43px;padding:0 16px;border:1px solid rgba(190,223,208,.18);border-radius:12px;background:rgba(8,25,30,.38);color:#c9d9d0;font-size:12px;font-weight:750;text-decoration:none;cursor:pointer;transition:.18s ease}
-    .btn:hover{transform:translateY(-1px);border-color:rgba(192,229,211,.4);background:rgba(255,255,255,.06);color:white}
-    .btn-main{border-color:rgba(201,228,183,.28);background:linear-gradient(115deg,#83c7a5,#acd8ba);color:#102a28;box-shadow:0 8px 24px rgba(48,119,83,.2)}
-    .btn-main:hover{border-color:#c7e7c6;background:linear-gradient(115deg,#98d6b5,#c0e6c4);color:#0d2523}
-    .btn:disabled{transform:none;cursor:not-allowed;border-color:var(--line);background:rgba(255,255,255,.035);color:#60736e;box-shadow:none}
-    .section-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:30px 2px 15px}
-    .section-head h2{margin:0;color:#e4eee7;font-size:18px;letter-spacing:-.02em}
-    .section-head p{margin:5px 0 0;color:#8fa9a0;font-size:11px;line-height:1.6}
-    .section-link{border:0;background:none;color:var(--jade);font-size:11px;font-weight:800;cursor:pointer}
-    .section-link:hover{color:#c0f1dd}
-    .map-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;position:relative}
-    .stage-card{position:relative;min-height:129px;overflow:hidden;padding:17px 17px 15px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(21,59,53,.8),rgba(12,37,43,.92));color:var(--text);text-align:left;cursor:pointer;box-shadow:0 12px 24px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.045);transition:.2s ease}
-    .stage-card:hover{transform:translateY(-3px);border-color:rgba(114,201,176,.35);box-shadow:0 19px 32px rgba(0,0,0,.23)}
-    .stage-card::after{content:"";position:absolute;right:-30px;bottom:-50px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(72,160,133,.14),transparent 70%);pointer-events:none}
-    .stage-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-    .stage-no{display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:rgba(114,201,176,.12);color:var(--jade2);font-size:11px;font-weight:850}
-    .stage-state{color:#77958b;font-size:9px;font-weight:750}
-    .stage-card.done .stage-state{color:var(--good)}
-    .stage-card h3{margin:0 0 5px;color:#e2eee6;font-size:14px}
-    .stage-card p{margin:0;color:#90aaa0;font-size:10px;line-height:1.6}
-    .mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
-    .mode-card{position:relative;min-height:150px;padding:19px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(140deg,rgba(20,61,56,.76),rgba(13,39,49,.84));box-shadow:0 14px 28px rgba(0,0,0,.18);transition:.2s ease}
-    .mode-card:hover{transform:translateY(-2px);border-color:rgba(131,189,202,.3)}
-    .mode-symbol{display:grid;place-items:center;width:37px;height:37px;margin-bottom:13px;border:1px solid rgba(131,189,202,.2);border-radius:12px;background:rgba(35,86,106,.2);color:var(--blue);font-size:16px}
-    .mode-card h3{margin-bottom:5px;color:#e5eee7;font-size:14px}
-    .mode-card p{margin:0 0 13px;color:#92aaa1;font-size:10px;line-height:1.7}
-    .mode-card button{padding:0;border:0;background:none;color:var(--jade);font-size:10px;font-weight:800;cursor:pointer}
-    .mode-card button:hover{color:#c4f0dc}
-    .source-panel{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:17px;padding:15px 18px;border:1px solid rgba(201,222,199,.11);border-radius:15px;background:rgba(3,20,25,.4)}
-    .source-panel strong{display:block;margin-bottom:4px;color:#d7e6db;font-size:11px}
-    .source-panel p{margin:0;color:#8fa69f;font-size:10px;line-height:1.7}
-    .source-links{display:flex;flex-wrap:wrap;gap:8px}
-    a.source{color:#a9d9ca;font-size:10px;text-decoration:none;border-bottom:1px dotted rgba(169,217,202,.48)}
-    a.source:hover{color:#e1f3e9}
-    .page-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:12px 2px 20px}
-    .page-head h1{margin:0;font-size:clamp(25px,4vw,37px)}
-    .page-head p{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.7}
-    .xp-pill{padding:9px 13px;border:1px solid rgba(114,201,176,.19);border-radius:99px;background:rgba(114,201,176,.08);color:#b8e7d1;font-size:11px;font-weight:800;white-space:nowrap}
-    .game-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(250px,.6fr);gap:16px;align-items:start}
-    .play-panel{padding:clamp(19px,3vw,29px)}
-    .play-head{display:flex;align-items:start;justify-content:space-between;gap:16px;margin-bottom:15px}
-    .step-kicker{margin:0 0 7px;color:var(--jade);font-size:10px;font-weight:850;letter-spacing:.1em}
-    .play-head h2{margin:0;color:#eef4eb;font-size:clamp(19px,2.5vw,25px);line-height:1.42}
-    .tag{padding:6px 9px;border:1px solid rgba(131,189,202,.2);border-radius:99px;background:rgba(35,86,106,.17);color:#a7d0d4;font-size:9px;font-weight:750;white-space:nowrap}
-    .scenario{margin-bottom:18px;padding:13px 15px;border:1px solid rgba(114,201,176,.12);border-radius:13px;background:rgba(4,22,27,.4);color:#bbcec4;font-size:12px;line-height:1.8}
-    .options{display:grid;gap:9px}
-    .option{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:14px;background:rgba(4,18,23,.32);color:#e3eee7;text-align:left;cursor:pointer;transition:.18s ease}
-    .option:hover{transform:translateY(-1px);border-color:rgba(190,221,205,.3);background:rgba(255,255,255,.04)}
-    .option.selected{border-color:rgba(114,201,176,.55);background:linear-gradient(110deg,rgba(63,133,100,.18),rgba(37,93,112,.16));box-shadow:0 0 0 2px rgba(114,201,176,.05)}
-    .option:disabled{cursor:default}
-    .option strong{display:block;font-size:12px;line-height:1.65}
-    .option small{display:block;margin-top:4px;color:#94aaa1;font-size:10px;line-height:1.65}
-    .sequence-box{display:flex;min-height:60px;flex-wrap:wrap;align-items:center;gap:7px;margin:12px 0 14px;padding:10px;border:1px dashed rgba(184,215,200,.22);border-radius:13px;background:rgba(3,15,19,.32)}
-    .seq-empty{color:#718a82;font-size:10px}
-    .sequence-chip{padding:8px 10px;border:1px solid rgba(114,201,176,.22);border-radius:9px;background:rgba(114,201,176,.08);color:#c8efdc;font-size:10px;cursor:pointer}
-    .sequence-chip b{margin-right:6px;color:var(--jade)}
-    .action-bank{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:7px}
-    .action-btn{min-height:41px;padding:9px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.035);color:#cbdad2;font-size:10px;font-weight:750;cursor:pointer}
-    .action-btn:hover{border-color:rgba(114,201,176,.34);background:rgba(114,201,176,.07)}
-    .value-list{display:grid;gap:9px}
-    .value-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(4,18,23,.28)}
-    .value-label{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-    .value-label code{color:#c7ecce;font-weight:850}
-    .value-label span{color:#8ea79d;font-size:10px}
-    .value-options{display:flex;gap:6px}
-    .value-btn{min-width:42px;padding:8px 9px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.025);color:#c3d0c9;font:750 10px ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer}
-    .value-btn.selected{border-color:rgba(114,201,176,.55);background:rgba(114,201,176,.12);color:#cef1dd}
-    .feedback{display:flex;gap:10px;margin-top:16px;padding:13px 14px;border:1px solid;border-radius:13px;font-size:11px;line-height:1.75}
-    .feedback.good{border-color:rgba(133,216,173,.24);background:rgba(79,155,111,.1);color:#caefda}
-    .feedback.bad{border-color:rgba(241,154,145,.22);background:rgba(140,65,66,.11);color:#f3cfca}
-    .feedback-mark{flex:0 0 auto;font-weight:900}
-    .play-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px;padding-top:15px;border-top:1px solid var(--line)}
-    .side-stack{display:grid;gap:12px}
-    .side-panel{padding:17px}
-    .side-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;color:#e0ece4;font-size:12px;font-weight:850}
-    .side-muted{color:#78948a;font-size:9px;font-weight:550}
-    .steps-list{display:grid;gap:5px;margin:0;padding:0;list-style:none}
-    .steps-list li{display:flex;align-items:center;gap:9px;min-height:36px;padding:6px 8px;border:1px solid transparent;border-radius:10px;color:#78938a;font-size:10px}
-    .steps-list li.active{border-color:rgba(114,201,176,.2);background:rgba(114,201,176,.07);color:#c7efdc}
-    .steps-list li.done{color:#9adbb7}
-    .step-dot{display:grid;place-items:center;width:22px;height:22px;flex:0 0 auto;border-radius:7px;background:rgba(255,255,255,.05);font-size:9px;font-weight:850}
-    .steps-list li.done .step-dot{background:rgba(133,216,173,.12);color:var(--good)}
-    .now-tag{margin-left:auto;color:var(--jade);font-size:8px;font-weight:850;letter-spacing:.1em}
-    .sem-notes{display:grid;gap:9px;color:#9bb0a8;font-size:10px;line-height:1.75}
-    .sem-notes p{margin:0}
-    .sem-notes code{color:#c7eccd;font-weight:800}
-    .tip-panel{border-color:rgba(131,189,202,.15);background:linear-gradient(150deg,rgba(22,70,75,.54),rgba(11,34,39,.9))}
-    .tip-panel p{margin:0;color:#a9c0ba;font-size:10px;line-height:1.8}
-    .exam-grid{display:grid;grid-template-columns:250px minmax(0,1fr);gap:15px;align-items:start}
-    .exam-nav{display:grid;gap:9px;padding:12px}
-    .exam-case{padding:15px;border:1px solid transparent;border-radius:15px;background:rgba(3,18,22,.35);color:var(--text);text-align:left;cursor:pointer;transition:.18s ease}
-    .exam-case:hover{border-color:rgba(131,189,202,.2)}
-    .exam-case.active{border-color:rgba(114,201,176,.3);background:linear-gradient(125deg,rgba(114,201,176,.1),rgba(35,86,106,.12))}
-    .exam-year{display:block;margin-bottom:6px;color:var(--jade);font-size:9px;font-weight:850;letter-spacing:.1em}
-    .exam-case strong{display:block;margin-bottom:5px;font-size:12px}
-    .exam-case small{color:#8ea79e;font-size:9px;line-height:1.6}
-    .exam-work{padding:clamp(18px,3vw,27px)}
-    .exam-progress{margin:0 0 18px;color:#8ea89e;font-size:10px}
-    .exam-credit{margin-top:18px;padding:12px 14px;border:1px solid rgba(232,189,120,.16);border-radius:12px;background:rgba(113,84,40,.09);color:#c5b89a;font-size:10px;line-height:1.8}
-    .source-inline{color:#b2dfd0}
-    .sim-layout{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(280px,.82fr);gap:15px;align-items:start}
-    .sim-panel{padding:19px}
-    .sim-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 16px}
-    .seg-btn{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.025);color:#a9bdb4;font-size:10px;font-weight:750;cursor:pointer}
-    .seg-btn.active{border-color:rgba(114,201,176,.4);background:rgba(114,201,176,.1);color:#c8efdc}
-    .buffer-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
-    .buffer-slot{display:grid;place-items:center;min-height:67px;border:1px dashed rgba(176,209,193,.23);border-radius:13px;background:rgba(3,16,20,.35);color:#627b73;font-size:10px}
-    .buffer-slot.filled{border-style:solid;border-color:rgba(131,189,202,.35);background:linear-gradient(140deg,rgba(35,86,106,.25),rgba(114,201,176,.1));color:#c6e8df;box-shadow:inset 0 1px rgba(255,255,255,.08),0 8px 20px rgba(0,0,0,.14)}
-    .sem-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-    .sem-token{padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(3,17,22,.34);text-align:center}
-    .sem-token code{display:block;margin-bottom:4px;color:#9cdbcb;font-size:10px;font-weight:800}
-    .sem-token strong{font:800 17px ui-monospace,SFMono-Regular,Menlo,monospace;color:#edf4ee}
-    .process-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-    .process-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(3,18,22,.34)}
-    .process-card.blocked{border-color:rgba(241,154,145,.3);background:rgba(110,46,48,.12)}
-    .process-card h3{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;color:#e0ece4;font-size:11px}
-    .proc-status{color:#91b7a5;font-size:9px}
-    .process-card.blocked .proc-status{color:#f0a29c}
-    .next-op{margin-bottom:9px;color:#9ab0a5;font:10px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
-    .process-card .btn{width:100%;min-height:37px;font-size:10px}
-    .trace{display:grid;gap:6px;max-height:260px;overflow:auto;margin:0;padding:0;list-style:none}
-    .trace li{padding:8px 10px;border-left:2px solid rgba(114,201,176,.4);border-radius:0 9px 9px 0;background:rgba(2,14,18,.36);color:#9eb5ac;font-size:9px;line-height:1.55}
-    .deadlock-banner{margin-top:12px;padding:12px 13px;border:1px solid rgba(241,154,145,.3);border-radius:12px;background:rgba(128,57,59,.13);color:#f1c0bc;font-size:11px;line-height:1.7}
-    .practice-card{max-width:880px;margin:auto;padding:clamp(20px,4vw,34px)}
-    .round-pips{display:flex;gap:6px;margin:0 0 17px}
-    .round-pips span{width:28px;height:5px;border-radius:99px;background:rgba(255,255,255,.09)}
-    .round-pips span.active{background:var(--jade);box-shadow:0 0 12px rgba(114,201,176,.3)}
-    .review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .mistake-card{padding:15px;border:1px solid rgba(241,154,145,.16);border-radius:14px;background:rgba(85,47,48,.12)}
-    .mistake-card strong{display:block;margin-bottom:6px;color:#eed8d1;font-size:11px}
-    .mistake-card p{margin:0;color:#b7a39e;font-size:10px;line-height:1.7}
-    .empty-state{padding:38px 20px;text-align:center}
-    .empty-mark{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 14px;border:1px solid rgba(114,201,176,.19);border-radius:18px;background:rgba(114,201,176,.08);color:var(--jade);font-size:21px}
-    .empty-state h2{margin-bottom:7px;color:#e3eee6;font-size:16px}
-    .empty-state p{margin:0 auto 17px;max-width:420px;color:#91a99f;font-size:11px;line-height:1.8}
-    .complete-card{padding:clamp(23px,4vw,40px)}
-    .complete-mark{display:grid;place-items:center;width:58px;height:58px;margin-bottom:19px;border:1px solid rgba(232,189,120,.27);border-radius:18px;background:rgba(232,189,120,.1);color:var(--gold);font-size:25px}
-    .code-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0 0}
-    .code-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:rgba(2,14,18,.38)}
-    .code-label{padding:10px 13px;border-bottom:1px solid var(--line);color:#a6d6c3;font-size:10px;font-weight:850}
-    pre{overflow:auto;margin:0;padding:13px;color:#d2e5d9;font:10px/1.8 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-    .end-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:20px}
-    .foot{margin:21px 0 0;color:#708880;font-size:9px;line-height:1.7;text-align:center}
-    @media(max-width:960px){
-      .topbar{flex-wrap:wrap}
-      .nav{order:3;width:100%;overflow-x:auto;justify-content:flex-start}
-      .nav-link{white-space:nowrap}
-      .hero-stats{min-width:140px}
-      .exam-grid{grid-template-columns:205px minmax(0,1fr)}
+    button:focus-visible{outline:3px solid rgba(121,210,178,.72);outline-offset:3px}
+    .shell{width:min(1420px,calc(100% - 32px));margin:auto;padding:18px 0 34px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .brand{display:flex;align-items:center;gap:11px}
+    .brand-stamp{display:grid;place-items:center;width:43px;height:43px;border:1px solid rgba(151,220,190,.38);border-radius:15px;background:linear-gradient(145deg,rgba(132,218,175,.19),rgba(42,108,127,.23));color:#c1f0d8;font-weight:900;box-shadow:0 10px 28px #0006,inset 0 1px #fff2}
+    .brand strong{display:block;font-size:14px;letter-spacing:.04em}
+    .brand small{display:block;color:#83a69b;font-size:9px;letter-spacing:.2em}
+    .top-stats{display:flex;align-items:center;gap:8px}
+    .stat-pill{display:flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#06191dbb;color:#a9c4b8;font-size:10px}
+    .stat-pill b{color:#eaf5eb;font-size:12px}
+    .layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:15px;align-items:start}
+    .panel{border:1px solid var(--line);border-radius:21px;background:linear-gradient(145deg,rgba(21,58,52,.83),rgba(8,32,39,.94));box-shadow:0 22px 58px #0004,inset 0 1px #eafff20b;backdrop-filter:blur(14px)}
+    .map-panel{padding:15px;position:sticky;top:12px}
+    .map-head{display:flex;align-items:center;justify-content:space-between;margin:1px 2px 12px}
+    .map-head strong{font-size:12px}
+    .map-head span{color:#79998e;font-size:9px}
+    .stage-list{display:grid;gap:7px}
+    .stage-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid transparent;border-radius:13px;background:rgba(3,20,24,.33);color:#a9c0b7;text-align:left;cursor:pointer;transition:.18s ease}
+    .stage-btn:hover:not(:disabled){transform:translateY(-1px);border-color:rgba(121,210,178,.3);background:rgba(121,210,178,.06)}
+    .stage-btn.active{border-color:rgba(121,210,178,.35);background:linear-gradient(115deg,rgba(121,210,178,.13),rgba(47,111,130,.12));color:#e7f7eb;box-shadow:inset 0 1px #fff1}
+    .stage-btn:disabled{cursor:not-allowed;opacity:.38}
+    .stage-num{display:grid;place-items:center;flex:0 0 30px;height:30px;border:1px solid rgba(134,203,174,.18);border-radius:10px;background:rgba(121,210,178,.08);color:#b1e8ca;font-size:10px;font-weight:850}
+    .stage-copy{min-width:0}
+    .stage-copy b{display:block;overflow:hidden;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+    .stage-copy small{display:block;margin-top:2px;color:#78968c;font-size:9px}
+    .stage-check{margin-left:auto;color:var(--good);font-size:12px}
+    .map-note{margin-top:13px;padding:12px;border:1px solid rgba(124,191,183,.13);border-radius:13px;background:rgba(5,27,34,.45);color:#8eaaa1;font-size:9px;line-height:1.8}
+    .map-note b{color:#bedacb}
+    .game{min-width:0}
+    .game-head{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:4px 3px 12px}
+    .eyebrow{margin:0 0 5px;color:var(--jade);font-size:9px;font-weight:850;letter-spacing:.17em}
+    h1{margin:0;color:#eff5e8;font-size:clamp(25px,3.5vw,39px);letter-spacing:-.04em;line-height:1.15;text-shadow:0 4px 28px #0006}
+    .game-subtitle{margin:7px 0 0;color:#a9c1b6;font-size:11px;line-height:1.75}
+    .level-badge{padding:8px 11px;border:1px solid rgba(121,210,178,.19);border-radius:999px;background:rgba(121,210,178,.07);color:#bfe9d3;font-size:10px;font-weight:800;white-space:nowrap}
+    .scene{position:relative;overflow:hidden;padding:16px;border:1px solid rgba(175,221,194,.22);border-radius:23px;background:linear-gradient(180deg,rgba(13,49,47,.78),rgba(8,33,40,.96));box-shadow:0 23px 56px #0005,inset 0 1px #fff1}
+    .landscape{position:absolute;inset:0;width:100%;height:100%;opacity:.68;pointer-events:none}
+    .scene-content{position:relative;z-index:1}
+    .scene-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 13px}
+    .objective{display:flex;align-items:center;gap:9px;color:#d4e8da;font-size:11px;font-weight:800}
+    .objective-mark{display:grid;place-items:center;width:28px;height:28px;border:1px solid rgba(232,194,124,.24);border-radius:9px;background:rgba(232,194,124,.1);color:var(--gold)}
+    .objective small{display:block;margin-top:1px;color:#8da99e;font-size:9px;font-weight:500}
+    .objective-progress{display:flex;align-items:center;gap:9px;color:#a4c2b5;font-size:9px;white-space:nowrap}
+    .progress-track{width:90px;height:6px;overflow:hidden;border-radius:99px;background:#ffffff17}
+    .progress-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#68caa5,#bce9be);box-shadow:0 0 12px #79d2b266;transition:width .35s ease}
+    .buffer-deck{position:relative;margin:5px 0 12px;padding:13px 14px 15px;border:1px solid rgba(187,226,208,.18);border-radius:17px;background:linear-gradient(145deg,rgba(5,25,31,.63),rgba(15,52,58,.55));box-shadow:inset 0 1px #ffffff0d,0 11px 24px #0002}
+    .deck-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .deck-head strong{color:#d6e9dc;font-size:10px}
+    .deck-head span{color:#7f9d91;font-size:9px}
+    .buffer-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+    .buffer-slot{position:relative;display:grid;place-items:center;min-height:49px;overflow:hidden;border:1px dashed rgba(170,208,191,.2);border-radius:12px;background:rgba(2,16,21,.35);color:#627e75;font-size:9px;transition:.22s ease}
+    .buffer-slot.filled{border-style:solid;border-color:rgba(130,202,200,.4);background:linear-gradient(145deg,rgba(42,108,127,.42),rgba(60,145,118,.22));color:#d3eee2;box-shadow:inset 0 1px #fff2,0 8px 17px #0003}
+    .good-icon{display:block;font-size:21px;filter:drop-shadow(0 5px 5px #0005);animation:land .35s cubic-bezier(.2,.8,.2,1)}
+    .slot-label{display:block;color:#b4d2c4;font-size:8px}
+    .buffer-slot.pulse{animation:slotPulse .55s ease}
+    @keyframes slotPulse{50%{transform:translateY(-4px) scale(1.04);box-shadow:0 0 20px #8de0bd77}}
+    @keyframes land{0%{transform:translateY(-16px) scale(.7);opacity:.3}100%{transform:translateY(0) scale(1);opacity:1}}
+    .semaphore-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin:0 0 13px}
+    .sem-card{position:relative;overflow:hidden;padding:9px 11px;border:1px solid rgba(163,211,194,.15);border-radius:13px;background:rgba(3,21,27,.62);box-shadow:inset 0 1px #fff09}
+    .sem-card.changed{animation:semPop .4s ease}
+    @keyframes semPop{50%{transform:scale(1.045);border-color:#a8e9cc88;box-shadow:0 0 22px #7bd8b644}}
+    .sem-top{display:flex;align-items:center;justify-content:space-between;color:#86aaa0;font-size:9px}
+    .sem-top code{color:#aee6cf;font-weight:850}
+    .sem-value{display:flex;align-items:baseline;gap:6px;margin-top:1px}
+    .sem-value strong{color:#f0f7ee;font:800 22px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .sem-value span{color:#74948a;font-size:8px}
+    .actor-list{display:grid;gap:8px}
+    .actor-card{position:relative;padding:10px 12px 9px;border:1px solid rgba(173,217,194,.15);border-radius:15px;background:linear-gradient(125deg,rgba(6,25,30,.73),rgba(9,38,44,.77));box-shadow:0 10px 20px #0002,inset 0 1px #fff09;transition:border-color .2s,background .2s}
+    .actor-card.active{border-color:rgba(121,210,178,.43);background:linear-gradient(125deg,rgba(20,66,57,.86),rgba(10,47,54,.84))}
+    .actor-card.blocked{border-color:rgba(243,155,146,.42);background:linear-gradient(125deg,rgba(87,43,44,.35),rgba(22,37,42,.81))}
+    .actor-card.done{opacity:.7}
+    .actor-head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+    .actor-name{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:850}
+    .actor-emoji{display:grid;place-items:center;width:27px;height:27px;border:1px solid rgba(159,211,191,.17);border-radius:9px;background:rgba(110,180,146,.1);font-size:17px}
+    .actor-status{padding:4px 7px;border:1px solid rgba(146,197,171,.14);border-radius:99px;color:#9fc3b0;font-size:8px}
+    .actor-card.blocked .actor-status{border-color:#f19a9155;color:#ffb4a9}
+    .actor-card.done .actor-status{color:#9fdeb5}
+    .lane{position:relative;height:39px;margin:5px 5px 1px}
+    .lane-line{position:absolute;top:16px;left:3%;right:3%;height:3px;border-radius:99px;background:linear-gradient(90deg,#477c68,#3a7786,#7ab9a0);box-shadow:0 0 12px #72c9a433}
+    .lane-node{position:absolute;top:10px;width:14px;height:14px;border:2px solid rgba(157,201,180,.6);border-radius:50%;background:#0c302f;box-shadow:0 0 0 4px rgba(118,194,156,.08)}
+    .lane-node:nth-of-type(2){left:4%}.lane-node:nth-of-type(3){left:25%}.lane-node:nth-of-type(4){left:48%}.lane-node:nth-of-type(5){left:71%}.lane-node:nth-of-type(6){left:94%}
+    .traveler{position:absolute;z-index:1;top:0;left:var(--pos);width:34px;height:34px;display:grid;place-items:center;transform:translateX(-50%);transition:left .52s cubic-bezier(.2,.8,.2,1)}
+    .traveler-face{display:grid;place-items:center;width:31px;height:31px;border:1px solid rgba(177,231,197,.45);border-radius:11px;background:linear-gradient(145deg,#1e684f,#17485a);font-size:18px;box-shadow:0 7px 14px #0006,inset 0 1px #fff3;animation:float 2.4s ease-in-out infinite}
+    .actor-card.blocked .traveler-face{border-color:#f19a9180;background:linear-gradient(145deg,#7c403d,#49323a);animation:waitPulse .8s ease-in-out infinite}
+    .actor-card.done .traveler-face{background:linear-gradient(145deg,#456c50,#2f5561)}
+    @keyframes float{50%{transform:translateY(-3px)}}
+    @keyframes waitPulse{50%{box-shadow:0 0 0 8px #f19a9120,0 0 22px #f19a9144}}
+    .lane-labels{position:absolute;top:25px;left:0;right:0;display:flex;justify-content:space-between;color:#729188;font-size:7px}
+    .actor-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:3px}
+    .next-op{min-width:0;color:#90aca1;font-size:9px}
+    .next-op b{color:#c4dfce;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9px}
+    .run-step{flex:0 0 auto;min-height:31px;padding:0 11px;border:1px solid rgba(165,218,192,.22);border-radius:9px;background:linear-gradient(120deg,rgba(72,142,105,.22),rgba(39,104,120,.24));color:#c7eed7;font-size:9px;font-weight:800;cursor:pointer;transition:.16s ease}
+    .run-step:hover:not(:disabled){transform:translateY(-1px);border-color:rgba(157,231,190,.56);background:linear-gradient(120deg,rgba(81,164,115,.35),rgba(51,125,145,.34))}
+    .run-step:disabled{cursor:not-allowed;opacity:.34}
+    .scene-controls{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(187,222,205,.12)}
+    .control-group{display:flex;flex-wrap:wrap;gap:7px}
+    .control-btn{min-height:35px;padding:0 11px;border:1px solid rgba(169,214,193,.19);border-radius:10px;background:rgba(4,20,25,.6);color:#a9c4b8;font-size:9px;font-weight:750;cursor:pointer;transition:.16s ease}
+    .control-btn:hover{border-color:rgba(166,225,190,.4);color:#e0f3e6}
+    .control-btn.primary{border-color:rgba(190,230,190,.28);background:linear-gradient(115deg,#79c99f,#a4d9b0);color:#0d2c29;box-shadow:0 6px 18px #4b9b722b}
+    .control-btn.primary:hover{background:linear-gradient(115deg,#91d9b1,#c0e6bd)}
+    .control-btn.active{border-color:rgba(240,190,125,.4);background:rgba(142,103,48,.18);color:#f3d39d}
+    .mode-bar{display:flex;gap:7px;margin-bottom:11px}
+    .scene-bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,.62fr);gap:10px;margin-top:12px}
+    .subpanel{padding:12px 13px;border:1px solid rgba(172,218,195,.14);border-radius:15px;background:rgba(4,22,28,.58)}
+    .subhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:#cfe5d6;font-size:10px;font-weight:850}
+    .subhead small{color:#73948a;font-size:8px;font-weight:500}
+    .log-list{display:grid;gap:5px;max-height:130px;overflow:auto;margin:0;padding:0;list-style:none}
+    .log-item{display:flex;gap:7px;padding:6px 8px;border-left:2px solid rgba(118,206,167,.42);border-radius:0 8px 8px 0;background:rgba(2,15,19,.34);color:#91ada1;font-size:8px;line-height:1.6}
+    .log-item.warn{border-color:#e5ad6d;color:#ddc39b}
+    .log-item.danger{border-color:#f19188;color:#efb2aa}
+    .log-item strong{flex:0 0 auto;color:#b6d8c4;font-weight:750}
+    .journal{color:#9ab5a9;font-size:9px;line-height:1.8}
+    .journal b{color:#cde3d4}
+    .tip-chip{display:inline-block;margin:6px 4px 0 0;padding:4px 7px;border:1px solid rgba(130,194,191,.18);border-radius:99px;background:rgba(31,86,98,.17);color:#a7d2d0;font-size:8px}
+    .deadlock-banner,.win-banner{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;border:1px solid rgba(241,154,145,.35);border-radius:12px;background:linear-gradient(100deg,rgba(126,55,55,.27),rgba(37,39,44,.44));color:#f0c1b6;font-size:9px;line-height:1.7;animation:arrive .3s ease}
+    .win-banner{border-color:rgba(143,224,176,.33);background:linear-gradient(100deg,rgba(51,117,81,.25),rgba(26,62,67,.43));color:#c5e9d0}
+    .banner-icon{font-size:19px}
+    @keyframes arrive{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    .locked-overlay{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(3,14,18,.65);backdrop-filter:blur(8px)}
+    .modal-card{width:min(450px,100%);padding:26px;border:1px solid rgba(178,221,195,.28);border-radius:24px;background:linear-gradient(145deg,#123a36,#0c2a34);box-shadow:0 30px 90px #0009;text-align:center;animation:arrive .3s ease}
+    .modal-mark{display:grid;place-items:center;width:57px;height:57px;margin:0 auto 15px;border:1px solid rgba(234,194,124,.34);border-radius:19px;background:rgba(234,194,124,.12);color:var(--gold);font-size:25px}
+    .modal-card h2{margin:0 0 8px;font-size:22px}
+    .modal-card p{margin:0 auto 18px;max-width:340px;color:#a9c3b6;font-size:11px;line-height:1.8}
+    .modal-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+    .footer-note{margin:14px 0 0;color:#6e8b81;font-size:8px;text-align:center}
+    @media(max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .map-panel{position:static}
+      .stage-list{grid-template-columns:repeat(5,minmax(0,1fr))}
+      .stage-btn{align-items:flex-start;flex-direction:column;gap:6px;min-height:83px}
+      .stage-check{margin-left:0}
+      .map-note{display:none}
     }
-    @media(max-width:760px){
-      .shell{width:min(100% - 24px,620px);padding-top:13px}
-      .hero{align-items:start;flex-direction:column;min-height:380px}
-      .hero-art{inset:auto 0 0;width:100%;height:62%;mask-image:linear-gradient(0deg,black 0%,rgba(0,0,0,.7) 55%,transparent 100%)}
-      .hero-stats{display:flex;flex-wrap:wrap}
-      .hero-stat{min-width:125px}
-      .map-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .mode-grid{grid-template-columns:1fr}
-      .mode-card{min-height:130px}
-      .game-layout,.sim-layout{grid-template-columns:1fr}
-      .side-stack{grid-template-columns:1fr 1fr}
-      .side-stack .side-panel:first-child{grid-column:span 2}
-      .exam-grid{grid-template-columns:1fr}
-      .exam-nav{grid-template-columns:1fr 1fr}
+    @media(max-width:650px){
+      .shell{width:calc(100% - 20px);padding-top:11px}
+      .topbar{align-items:flex-start}
+      .top-stats{gap:5px}
+      .stat-pill{padding:7px 8px;font-size:8px}
+      .layout{gap:10px}
+      .map-panel{padding:10px}
+      .stage-list{display:flex;overflow:auto;padding-bottom:3px}
+      .stage-btn{flex:0 0 128px;min-height:72px;padding:8px}
+      .stage-copy b{font-size:10px}
+      .game-head{align-items:flex-start}
+      .game-subtitle{max-width:390px}
+      .scene{padding:10px;border-radius:18px}
+      .scene-top{align-items:flex-start}
+      .objective-progress{flex-direction:column;align-items:flex-end;gap:4px}
+      .progress-track{width:72px}
+      .buffer-deck{padding:10px}
+      .buffer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .buffer-slot{min-height:43px}
+      .actor-card{padding:8px}
+      .actor-footer{align-items:flex-end}
+      .next-op{font-size:8px}
+      .scene-controls{align-items:flex-start;flex-direction:column}
+      .control-group{width:100%}
+      .control-btn{flex:1}
+      .scene-bottom{grid-template-columns:1fr}
+      .scene-bottom .subpanel:last-child{min-height:80px}
     }
-    @media(max-width:520px){
-      .profile-label{display:none}
-      .hero{padding:23px 19px}
-      .hero h1{font-size:35px}
-      .map-grid{grid-template-columns:1fr 1fr;gap:8px}
-      .stage-card{min-height:119px;padding:13px}
-      .stage-card p{font-size:9px}
-      .section-head{align-items:start;flex-direction:column}
-      .source-panel{align-items:start;flex-direction:column}
-      .side-stack{grid-template-columns:1fr}
-      .side-stack .side-panel:first-child{grid-column:auto}
-      .exam-nav{grid-template-columns:1fr}
-      .play-actions{align-items:stretch}
-      .play-actions .btn{flex:1}
-      .value-row{align-items:start;flex-direction:column}
-      .process-grid{grid-template-columns:1fr}
-      .review-grid,.code-grid{grid-template-columns:1fr}
-      .sem-row{gap:5px}
-      .sem-token{padding:9px 5px}
-      .sem-token strong{font-size:15px}
-    }
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
   </style>
 </head>
 <body>
   <div class="shell">
     <header class="topbar">
-      <a class="brand" href="./" data-route="map">
-        <span class="brand-mark">青岚</span>
-        <span>信号量修炼场<small>OS · PV JOURNEY</small></span>
-      </a>
-      <nav class="nav" aria-label="训练模式">
-        <button class="nav-link active" data-route="map">山水行记</button>
-        <button class="nav-link" data-route="story">主线闯关</button>
-        <button class="nav-link" data-route="exam">真题秘境</button>
-        <button class="nav-link" data-route="sandbox">并发沙盘</button>
-        <button class="nav-link" data-route="practice">随机试炼</button>
-        <button class="nav-link" data-route="review">错题回看</button>
-      </nav>
-      <div class="profile"><span class="profile-mark">研</span><span class="profile-label">研习者 · <b id="rank-label">初入青岚</b></span></div>
+      <div class="brand">
+        <span class="brand-stamp">青岚</span>
+        <span><strong>同步互斥 · 并发山谷</strong><small>OS · INTERACTIVE PV GAME</small></span>
+      </div>
+      <div class="top-stats">
+        <span class="stat-pill">修炼值 <b id="xp">0</b></span>
+        <span class="stat-pill">山路进度 <b id="progress">1 / 5</b></span>
+      </div>
     </header>
-    <main id="app" class="page" aria-live="polite"></main>
-    <p class="foot">山水有序，PV 有迹。答错不会扣分；每次解释清楚为什么，才算真正过关。</p>
+    <main class="layout">
+      <aside class="panel map-panel">
+        <div class="map-head"><strong>山路关卡</strong><span>过关解锁</span></div>
+        <div class="stage-list" id="stage-list"></div>
+        <div class="map-note"><b>怎么游玩</b><br>点每个角色的「执行一步」，亲手安排并发顺序。货物、信号量、锁和等待状态都会随操作即时变化。<br><b>不考选择题，直接玩同步。</b></div>
+      </aside>
+      <section class="game">
+        <header class="game-head">
+          <div>
+            <p class="eyebrow" id="stage-kicker">并发山谷 · 第 1 关</p>
+            <h1 id="stage-title">竹林供需</h1>
+            <p class="game-subtitle" id="stage-desc"></p>
+          </div>
+          <span class="level-badge" id="level-badge">同步演练</span>
+        </header>
+        <section class="scene panel" id="scene">
+          <svg class="landscape" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="mountainA" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#82b69a" stop-opacity=".28"/><stop offset="1" stop-color="#28614e" stop-opacity=".06"/></linearGradient>
+              <linearGradient id="waterA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80d5bf" stop-opacity=".02"/><stop offset=".55" stop-color="#56b3c0" stop-opacity=".18"/><stop offset="1" stop-color="#448ba8" stop-opacity=".04"/></linearGradient>
+              <radialGradient id="moonA"><stop stop-color="#d9e6c0" stop-opacity=".2"/><stop offset="1" stop-color="#d9e6c0" stop-opacity="0"/></radialGradient>
+            </defs>
+            <circle cx="985" cy="93" r="118" fill="url(#moonA)"/>
+            <path d="M0 360 120 206l83 93L373 104l148 203L679 125l148 189 132-174 241 227v333H0Z" fill="url(#mountainA)"/>
+            <path d="m0 434 161-153 110 83 167-191 137 174 147-121 137 165 117-99 224 176v254H0Z" fill="#285548" opacity=".48"/>
+            <path d="m0 492 154-104 133 79 155-109 152 104 140-77 122 93 132-69 222 105v224H0Z" fill="#123d3b" opacity=".75"/>
+            <path d="M657 238c-95 87-70 147 19 173 90 27 74 75-6 110-79 35-119 74-52 111 45 25 74 35 90 74" fill="none" stroke="url(#waterA)" stroke-width="82" stroke-linecap="round"/>
+            <path d="M657 238c-87 81-63 136 22 162 83 26 68 69-9 103-73 33-108 68-48 100" fill="none" stroke="#a7ded0" stroke-opacity=".23" stroke-width="2"/>
+            <path d="M0 429c202-56 339-10 490 1s326-65 710-8" fill="none" stroke="#d3e7cf" stroke-opacity=".1" stroke-width="2"/>
+          </svg>
+          <div class="scene-content">
+            <div class="scene-top">
+              <div class="objective">
+                <span class="objective-mark" id="objective-icon">✦</span>
+                <span><span id="objective-text">让货物流动起来</span><small id="objective-hint">自己调度进程，每一步都能撤重开</small></span>
+              </div>
+              <div class="objective-progress"><span id="goal-count">0 / 3</span><span class="progress-track"><span class="progress-fill" id="goal-fill" style="width:0%"></span></span></div>
+            </div>
+            <div id="mode-bar" class="mode-bar"></div>
+            <div class="buffer-deck">
+              <div class="deck-head"><strong>共享资源 · 缓冲区</strong><span id="buffer-count">0 / 2 件</span></div>
+              <div class="buffer-grid" id="buffer-grid"></div>
+            </div>
+            <div class="semaphore-row" id="semaphore-row"></div>
+            <div class="actor-list" id="actor-list"></div>
+            <div class="scene-controls">
+              <div class="control-group">
+                <button class="control-btn primary" data-action="auto" id="auto-btn">▶ 自动轮转</button>
+                <button class="control-btn" data-action="reset">↺ 重置本关</button>
+              </div>
+              <div class="control-group">
+                <button class="control-btn" data-action="hint">⌘ 看本关口诀</button>
+                <button class="control-btn" data-action="next" id="next-btn" hidden>登上下一段 →</button>
+              </div>
+            </div>
+            <div id="status-banner"></div>
+          </div>
+        </section>
+        <div class="scene-bottom">
+          <section class="subpanel">
+            <div class="subhead">并发轨迹 <small>新动作在上</small></div>
+            <ol class="log-list" id="log-list"></ol>
+          </section>
+          <aside class="subpanel">
+            <div class="subhead">山谷札记 <small id="lesson-tag">本关知识点</small></div>
+            <div class="journal" id="journal"></div>
+            <div id="chips"></div>
+          </aside>
+        </div>
+        <p class="footer-note">每个 P 和 V 都会改变真实的资源状态。试错、重开、换一种调度，再看山谷如何回应。</p>
+      </section>
+    </main>
   </div>
+  <div id="modal-root"></div>
   <script>
-    const STORE_KEY = 'qinglan-pv-journey-v1';
-    const MAIN_STEPS = ['辨进程', '排动作', '写 P/V', '定初值', '查等待', '看死锁'];
-    const MAIN_ACTIONS = ['P(empty)', 'P(mutex)', '放入缓冲区', 'V(mutex)', 'V(full)'];
-    const MAIN_ANSWER = ['P(empty)', 'P(mutex)', '放入缓冲区', 'V(mutex)', 'V(full)'];
-    const SOURCE_2014 = 'https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/becf4a64-f52d-4e03-bf57-edd1e6d9bb11.pdf';
-    const SOURCE_2024 = 'https://www.xit.edu.cn/_upload/article/files/c1/ce/26986f79493495bbaacba9738587/6b611f5c-55d9-4612-8ff9-30b028731314.pdf';
+    const STORE_KEY = "qinglan-concurrency-game-v2";
+    const levelNames = ["竹林供需","满仓险路","批次行商","单格传信","互斥改写"];
+    const levelShort = ["生产者与消费者","持锁等待","2014 批量取货变式","2024 单格同步变式","两个修改者"];
+    const save = loadSave();
+    let currentLevel = 0;
+    let game;
+    let autoTimer = null;
+    let autoCursor = 0;
+    let lastFlash = "";
+    let lastSemFlash = "";
 
-    function loadSave() {
-      try {
-        const value = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    function loadSave(){
+      try{
+        const value = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
         return {
           xp: Number(value.xp) || 0,
-          clearedMain: Array.isArray(value.clearedMain) ? value.clearedMain : [],
-          completedTasks: Array.isArray(value.completedTasks) ? value.completedTasks : [],
-          examCleared: Array.isArray(value.examCleared) ? value.examCleared : [],
-          mistakes: Array.isArray(value.mistakes) ? value.mistakes : [],
-          deadlockSolved: Boolean(value.deadlockSolved)
+          unlocked: Math.max(1, Math.min(5, Number(value.unlocked) || 1)),
+          cleared: Array.isArray(value.cleared) ? value.cleared : [],
+          deadlockBonus: Boolean(value.deadlockBonus)
         };
-      } catch (e) {
-        return { xp: 0, clearedMain: [], completedTasks: [], examCleared: [], mistakes: [], deadlockSolved: false };
+      }catch(e){
+        return {xp:0,unlocked:1,cleared:[],deadlockBonus:false};
       }
     }
-
-    const save = loadSave();
-    let route = 'map';
-    const main = { step: 0, choice: '', order: [], values: { empty: '', full: '', mutex: '' }, feedback: null };
-    const exam = { year: '2014', step: 0, choice: '', values: {}, feedback: null };
-    let practice = makePractice();
-    let sim = makeSimulation(2, 'safe', []);
-
-    function persist() {
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) {}
-      updateRank();
+    function persist(){
+      try{localStorage.setItem(STORE_KEY,JSON.stringify(save));}catch(e){}
+      const xp = document.getElementById("xp");
+      const progress = document.getElementById("progress");
+      if(xp) xp.textContent = save.xp;
+      if(progress) progress.textContent = save.unlocked + " / 5";
     }
-
-    function updateRank() {
-      const rank = save.xp >= 100 ? '山水通明' : save.xp >= 45 ? '掌灯行者' : '初入青岚';
-      const el = document.getElementById('rank-label');
-      if (el) el.textContent = rank;
-    }
-
-    function escapeHTML(value) {
-      return String(value).replace(/[&<>"']/g, function(c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    function esc(value){
+      return String(value).replace(/[&<>"']/g,function(c){
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
       });
     }
-
-    function award(taskId, amount) {
-      if (save.completedTasks.includes(taskId)) return false;
-      save.completedTasks.push(taskId);
-      save.xp += amount;
-      persist();
-      return true;
+    function P(key){return {kind:"P",key:key};}
+    function V(key){return {kind:"V",key:key};}
+    function A(kind,value){return {kind:kind,value:value};}
+    function batchOps(){
+      const ops=[P("batchLock")];
+      for(let i=0;i<3;i++) ops.push(P("full"),P("bufferLock"),A("get"),V("bufferLock"),V("empty"));
+      ops.push(V("batchLock"));
+      return ops;
     }
-
-    function addMistake(id, title, principle) {
-      if (!save.mistakes.some(function(item) { return item.id === id; })) {
-        save.mistakes.unshift({ id: id, title: title, principle: principle });
-        save.mistakes = save.mistakes.slice(0, 30);
-        persist();
+    function levelConfig(index,mode){
+      if(index===0){
+        return {
+          title:"竹林供需",tag:"基础同步 · 生产者 / 消费者",
+          desc:"亲手安排生产者与消费者的执行顺序。让三件山果顺利穿过缓冲区，观察 empty、full 和 mutex 如何联动。",
+          objective:"把 3 件山果送过山门",hint:"先申请对应资源，再拿互斥锁进入共享区。",
+          capacity:2,initial:[],goods:["🍑","🍐","🌰","🍑","🍐"],
+          sem:{empty:2,full:0,mutex:1},
+          actors:[
+            {id:"producer",name:"采果人 · 生产者",icon:"🧑‍🌾",loop:true,ops:[P("empty"),P("mutex"),A("put"),V("mutex"),V("full")]},
+            {id:"consumer",name:"摆渡人 · 消费者",icon:"🦦",loop:true,ops:[P("full"),P("mutex"),A("get"),V("mutex"),V("empty")]}
+          ],
+          lesson:"生产者先 P(empty) 确认有空位，再 P(mutex) 写入；消费者先 P(full) 确认有产品，再进入临界区。离开临界区后 V(mutex)，最后 V 对应资源量。"
+        };
       }
-    }
-
-    function iconButton(text, routeName) {
-      return '<button class="btn" data-route="' + routeName + '">' + text + '</button>';
-    }
-
-    function renderMap() {
-      const stages = [
-        ['01', '先辨进程', '几类进程，就先分几条执行线。'],
-        ['02', '动作排队', '把每类进程的动作写成自己的顺序。'],
-        ['03', '补上 P/V', '资源先申请，动作完成后再释放或通知。'],
-        ['04', '定义信号量', '先读懂含义，再填初值。'],
-        ['05', '检查阻塞', '每个 P 都问一声：这里会不会等？'],
-        ['06', '拆解死锁', '看谁拿着锁等资源，谁又等着拿锁。']
-      ];
-      const cards = stages.map(function(stage, index) {
-        const done = save.clearedMain.includes(index);
-        return '<button class="stage-card' + (done ? ' done' : '') + '" data-main-stage="' + index + '">' +
-          '<div class="stage-top"><span class="stage-no">' + stage[0] + '</span><span class="stage-state">' +
-          (done ? '✓ 已通关' : '进入关卡 →') + '</span></div><h3>' + stage[1] + '</h3><p>' + stage[2] + '</p></button>';
-      }).join('');
-      const percent = Math.round((save.clearedMain.length / 6) * 100);
-      return '<section class="hero"><div class="hero-copy"><p class="eyebrow"><span class="eyebrow-mark"></span>操作系统 · 408 山水研习</p>' +
-        '<h1>青岚山水行记</h1><p>把同步与互斥拆成一段段山路：先辨进程，再排动作、补 PV、看阻塞。闯关、真题变式和并发推演都在这张图里。</p>' +
-        '<button class="btn btn-main" data-route="story">继续登阶 <span aria-hidden="true">↗</span></button> ' +
-        '<button class="btn" data-route="exam">去真题秘境</button></div>' +
-        '<div class="hero-art" aria-hidden="true"><svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs><linearGradient id="mist" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9ac9b5" stop-opacity=".02"/><stop offset="1" stop-color="#8dc3ae" stop-opacity=".24"/></linearGradient><linearGradient id="river" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8fd6c1" stop-opacity=".08"/><stop offset=".5" stop-color="#62b3ba" stop-opacity=".48"/><stop offset="1" stop-color="#4e92a5" stop-opacity=".18"/></linearGradient></defs>' +
-        '<path d="M0 265 112 142l58 62L291 69l102 129L500 84l109 142 88-95 203 178v131H0Z" fill="#527c70" opacity=".31"/>' +
-        '<path d="m0 310 139-117 83 65 139-156 99 126 103-94 95 113 87-68 155 103v158H0Z" fill="#29584f" opacity=".62"/>' +
-        '<path d="m0 342 118-93 116 67 118-92 104 76 127-73 94 79 92-45 131 72v107H0Z" fill="#153b39" opacity=".89"/>' +
-        '<path d="M496 185c-70 54-54 100 9 124 44 17 42 50-9 68-57 19-92 36-62 62 18 16 67 20 99 40" fill="none" stroke="url(#river)" stroke-width="47" stroke-linecap="round"/>' +
-        '<path d="M491 183c-62 49-49 89 12 112 42 16 40 46-9 63-54 18-83 33-56 56" fill="none" stroke="#b2e3d1" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/>' +
-        '<path d="M0 270c138-33 209-19 329 4s208 12 306-12 177-25 265-2" fill="none" stroke="#d5e6d4" stroke-opacity=".12" stroke-width="2"/>' +
-        '<circle cx="674" cy="92" r="42" fill="#c7d9b8" opacity=".09"/><circle cx="674" cy="92" r="26" fill="#d9e4c5" opacity=".13"/>' +
-        '</svg></div><div class="hero-stats"><div class="hero-stat"><span>研习值</span><strong>' + save.xp + ' <small style="font-size:10px;color:#85a59a">XP</small></strong></div>' +
-        '<div class="hero-stat"><span>主线进度</span><strong>' + percent + '%</strong></div><div class="hero-stat"><span>错题待回看</span><strong>' + save.mistakes.length + ' <small style="font-size:10px;color:#85a59a">条</small></strong></div></div></section>' +
-        '<div class="section-head"><div><h2>沿山路逐步通关</h2><p>每一关只攻一个动作，走完六步再组合成完整解。</p></div><button class="section-link" data-route="story">进入主线 →</button></div>' +
-        '<section class="map-grid">' + cards + '</section>' +
-        '<div class="section-head"><div><h2>换一种练法</h2><p>题目、推演和随机变式轮着来，避免只背一套 PV。</p></div></div>' +
-        '<section class="mode-grid">' +
-        '<article class="mode-card"><div class="mode-symbol">卷</div><h3>真题秘境</h3><p>把 2014 多消费者批量取货、2024 单缓冲区操作改成可操作挑战。</p><button data-route="exam">选择真题原型 →</button></article>' +
-        '<article class="mode-card"><div class="mode-symbol">演</div><h3>并发沙盘</h3><p>自己调度生产者和消费者，观察空位、产品、互斥锁怎么变化。</p><button data-route="sandbox">进入沙盘 →</button></article>' +
-        '<article class="mode-card"><div class="mode-symbol">变</div><h3>随机试炼</h3><p>缓冲区容量、批量大小每轮变化，练会从题意重新定义信号量。</p><button data-route="practice">抽取变式 →</button></article></section>' +
-        '<div class="section-head"><div><h2>本轮收获</h2><p>熟练度靠解释和复盘累积，不靠倒计时催促。</p></div><button class="section-link" data-route="review">打开错题回看 →</button></div>' +
-        '<section class="panel" style="display:flex;flex-wrap:wrap;gap:10px;padding:15px">' +
-        '<span class="tag">主线 ' + save.clearedMain.length + ' / 6</span><span class="tag">真题关 ' + save.examCleared.length + ' / 6</span>' +
-        '<span class="tag">' + (save.deadlockSolved ? '✓ 已识别死锁' : '◇ 待破解：持锁等待') + '</span>' +
-        '<span class="tag">称号：' + (save.xp >= 100 ? '山水通明' : save.xp >= 45 ? '掌灯行者' : '初入青岚') + '</span></section>' +
-        '<section class="source-panel"><div><strong>题源与改编说明</strong><p>题型原型参考 2014 年 408 操作系统第 47 题、2024 年第 46 题；这里更换场景和参数，用互动练考点，不照搬整段题面。</p></div>' +
-        '<div class="source-links"><a class="source" href="' + SOURCE_2014 + '" target="_blank" rel="noreferrer">2014 题本 PDF</a><a class="source" href="' + SOURCE_2024 + '" target="_blank" rel="noreferrer">2024 题本 PDF</a></div></section>';
-    }
-
-    function optionHTML(prefix, id, title, detail, selected, disabled) {
-      return '<button class="option' + (selected ? ' selected' : '') + '" data-' + prefix + '-choice="' + escapeHTML(id) +
-        '" aria-pressed="' + Boolean(selected) + '"' + (disabled ? ' disabled' : '') + '><strong>' + title +
-        '</strong>' + (detail ? '<small>' + detail + '</small>' : '') + '</button>';
-    }
-
-    function valueRows(prefix, values, rows, options, disabled) {
-      return '<div class="value-list">' + rows.map(function(row) {
-        return '<div class="value-row"><div class="value-label"><code>' + row.label + '</code><span>' + row.meaning + '</span></div>' +
-          '<div class="value-options">' + options.map(function(value) {
-            const selected = values[row.key] === String(value);
-            return '<button class="value-btn' + (selected ? ' selected' : '') + '" data-' + prefix +
-              '-value-key="' + row.key + '" data-value="' + value + '" aria-pressed="' + selected + '"' +
-              (disabled ? ' disabled' : '') + '>' + value + '</button>';
-          }).join('') + '</div></div>';
-      }).join('') + '</div>';
-    }
-
-    function feedbackHTML(feedback) {
-      if (!feedback) return '';
-      return '<div class="feedback ' + (feedback.good ? 'good' : 'bad') + '" role="status"><span class="feedback-mark">' +
-        (feedback.good ? '✓' : '↻') + '</span><span>' + feedback.text + '</span></div>';
-    }
-
-    function mainQuestion() {
-      if (main.step === 0) {
-        return '<div class="options">' +
-          optionHTML('main','roles','生产者、消费者两类，各写一个循环函数','题目有几类进程，先按类别分出执行线。',main.choice==='roles',main.feedback?.good) +
-          optionHTML('main','one','把所有动作合在一个进程函数里','',main.choice==='one',main.feedback?.good) +
-          optionHTML('main','slots','缓冲区每个格子各对应一个进程','',main.choice==='slots',main.feedback?.good) + '</div>';
+      if(index===1){
+        const producerOps = mode==="safe"
+          ? [P("empty"),P("mutex"),A("put"),V("mutex"),V("full")]
+          : [P("mutex"),P("empty"),A("put"),V("mutex"),V("full")];
+        return {
+          title:"满仓险路",tag:"死锁观察 · 持锁等待",
+          desc:"山门已经塞满一件货。试着让生产者先拿锁再等空位，看看消费者能不能进去腾出位置；再重开一次，用安全顺序把路疏通。",
+          objective:"先看见死锁，再安全送出 1 件货",hint:"危险顺序：生产者拿 mutex 后等待 empty，消费者无法取货。",
+          capacity:1,initial:["货物已在仓"],goods:["📦","📦"],
+          sem:{empty:0,full:1,mutex:1},
+          actors:[
+            {id:"producer",name:"补货人 · 生产者",icon:"🧑‍🌾",loop:true,ops:producerOps},
+            {id:"consumer",name:"搬运人 · 消费者",icon:"🦦",loop:true,ops:[P("full"),P("mutex"),A("get"),V("mutex"),V("empty")]}
+          ],
+          lesson:"死锁不是“两个进程一起动”，而是资源等待绕成了圈。危险顺序把 mutex 拿在手里再等待 empty，消费者需要 mutex 才能取货并产生空位。"
+        };
       }
-      if (main.step === 1) {
-        const selected = main.order.length ? main.order.map(function(item,index) {
-          return '<button class="sequence-chip" data-main-remove="' + index + '"><b>' + (index+1) + '.</b>' + escapeHTML(item) + '</button>';
-        }).join('') : '<span class="seq-empty">按执行先后顺序点选动作</span>';
-        const bank = MAIN_ACTIONS.filter(function(item) { return !main.order.includes(item); }).map(function(item) {
-          return '<button class="action-btn" data-main-action="' + escapeHTML(item) + '">＋ ' + escapeHTML(item) + '</button>';
-        }).join('');
-        return '<p style="color:#9db5ad;font-size:10px;line-height:1.8">生产者已做好一个产品。排好它访问共享缓冲区时的动作；点错了可以点上方动作移除。</p>' +
-          '<div class="sequence-box">' + selected + '</div><div class="action-bank">' + bank + '</div>';
+      if(index===2){
+        return {
+          title:"批次行商",tag:"2014 真题考点改编 · 整批互斥",
+          desc:"六件货已装进驿站。甲、乙两位行商各要连续取三件；试着先让两人都申请批次锁，再看谁能整批通行。",
+          objective:"让一位行商完整取完 3 件",hint:"batchLock 管整批消费者；bufferLock 只保护每一次取放。",
+          capacity:6,initial:["🍑","🍐","🌰","🍑","🍐","🌰"],goods:["🍑","🍐","🌰","🍑","🍐","🌰"],
+          sem:{empty:0,full:6,bufferLock:1,batchLock:1},
+          actors:[
+            {id:"merchantA",name:"甲行商 · 消费者",icon:"🦊",loop:false,batch:3,ops:batchOps()},
+            {id:"merchantB",name:"乙行商 · 消费者",icon:"🐼",loop:false,batch:3,ops:batchOps()}
+          ],
+          lesson:"这道 2014 年题型原型考的是两层互斥：batchLock 在整批循环外申请、循环结束才释放；bufferLock 每取一件时单独保护缓冲区。改了故事、容量和批量，用推演体验“不能插队”。"
+        };
       }
-      if (main.step === 2) {
-        return '<div class="options">' +
-          optionHTML('main','consumer','P(full) → P(mutex) → 取出 → V(mutex) → V(empty)','先等产品，再进入临界区；取出后释放锁并归还空位。',main.choice==='consumer',main.feedback?.good) +
-          optionHTML('main','reverse','P(mutex) → P(full) → 取出 → V(empty) → V(mutex)','先拿锁再等待产品，可能占锁阻止另一方改变资源。',main.choice==='reverse',main.feedback?.good) +
-          optionHTML('main','notify','V(full) → 取出 → P(mutex) → V(empty)','',main.choice==='notify',main.feedback?.good) + '</div>';
+      if(index===3){
+        return {
+          title:"单格传信",tag:"2024 真题考点改编 · 写后再读",
+          desc:"山门只有一个数据舱。写手只写一次，读手只读一次；你来决定两条执行线的先后，看看读手如何等到数据就绪。",
+          objective:"让数据写入后被读手取走",hint:"dataReady 表示“数据已就绪”，它负责同步先后。",
+          capacity:1,initial:[],goods:["🗺️"],
+          sem:{dataReady:0},
+          actors:[
+            {id:"writer",name:"写手 · C1",icon:"🧑‍💻",loop:false,ops:[A("write"),V("dataReady")]},
+            {id:"reader",name:"读手 · C2",icon:"🕊️",loop:false,ops:[P("dataReady"),A("read")]}
+          ],
+          lesson:"这道 2024 年题型原型改写成单格数据舱。一次写、一次读时，P(dataReady) / V(dataReady) 已经保证写先于读，不必额外加 mutex；后面的关卡会单独模拟多个修改者需要互斥。"
+        };
       }
-      if (main.step === 3) {
-        return valueRows('main',main.values,[
-          {key:'empty',label:'empty',meaning:'空位数量'},
-          {key:'full',label:'full',meaning:'已有产品数量'},
-          {key:'mutex',label:'mutex',meaning:'缓冲区互斥锁'}
-        ],['N','0','1'],main.feedback?.good);
-      }
-      if (main.step === 4) {
-        return '<div class="options">' +
-          optionHTML('main','deadlock','会死锁：生产者持锁等空位，消费者要拿锁才能腾空位','缓冲区已满时，先拿 mutex 再等 empty 会卡住消费者。',main.choice==='deadlock',main.feedback?.good) +
-          optionHTML('main','slow','只会变慢，消费者一定能继续','',main.choice==='slow',main.feedback?.good) +
-          optionHTML('main','safe','不会出问题，因为 mutex 初值为 1','',main.choice==='safe',main.feedback?.good) + '</div>';
-      }
-      return '<div class="options">' +
-        optionHTML('main','audit','资源 P 在 mutex P 前；临界区后释放 mutex，再通知资源变化；初值 empty=N、full=0、mutex=1','',main.choice==='audit',main.feedback?.good) +
-        optionHTML('main','badorder','所有动作先 P(mutex)，拿锁后再等 empty/full','',main.choice==='badorder',main.feedback?.good) +
-        optionHTML('main','missing','消费者取完只 V(mutex)，不需要 V(empty)','',main.choice==='missing',main.feedback?.good) + '</div>';
-    }
-
-    function resetMainAnswer() {
-      main.choice = '';
-      main.order = [];
-      main.values = { empty: '', full: '', mutex: '' };
-      main.feedback = null;
-    }
-
-    function mainReady() {
-      if (main.step === 1) return main.order.length === MAIN_ANSWER.length;
-      if (main.step === 3) return Boolean(main.values.empty && main.values.full && main.values.mutex);
-      return Boolean(main.choice);
-    }
-
-    function checkMain() {
-      let correct = false, text = '', hint = '', title = MAIN_STEPS[main.step];
-      if (main.step === 0) {
-        correct = main.choice === 'roles';
-        text = '对。先把生产者和消费者分开写，每类进程各有自己的循环动作。';
-        hint = '先数执行主体：一个负责放产品，一个负责取产品。题目有两类进程，就先列两条执行线。';
-      } else if (main.step === 1) {
-        correct = main.order.length === MAIN_ANSWER.length && main.order.every(function(item,index){return item===MAIN_ANSWER[index];});
-        text = '顺序对了：先申请空位，再拿互斥锁；写入后先放锁，再发出“有产品”的通知。';
-        hint = '生产者先 P(empty)，再 P(mutex)；写入后 V(mutex)，最后 V(full)。';
-      } else if (main.step === 2) {
-        correct = main.choice === 'consumer';
-        text = '对。消费者先 P(full) 等产品，再用 mutex 保护取出动作；之后 V(mutex) 和 V(empty)。';
-        hint = '消费者的资源条件是“必须有产品”，所以 P(full) 要在申请互斥锁之前。';
-      } else if (main.step === 3) {
-        correct = main.values.empty === 'N' && main.values.full === '0' && main.values.mutex === '1';
-        text = '初值正确。空缓冲区有 N 个空位、0 个产品；互斥锁一开始可进入，所以 mutex=1。';
-        hint = '从题目开局状态数：空位 N 个、产品 0 个；互斥信号量可用，初值 1。';
-      } else if (main.step === 4) {
-        correct = main.choice === 'deadlock';
-        text = '会卡死。生产者拿着 mutex 等 empty；消费者无法进入缓冲区取产品，也就无法释放空位。';
-        hint = '把缓冲区设成已满：哪一个进程占着 mutex？另一个进程能不能进去取产品并增加 empty？';
-      } else {
-        correct = main.choice === 'audit';
-        text = '检查完整了。先等资源、再进临界区；出临界区后释放互斥锁，并正确通知对方资源变化。';
-        hint = '逐项核对资源 P、mutex P、临界区、V 的释放顺序和三种信号量初值。';
-      }
-      if (correct) {
-        if (!save.clearedMain.includes(main.step)) save.clearedMain.push(main.step);
-        award('main-' + main.step, 10);
-      } else {
-        addMistake('main-' + main.step,title,hint);
-      }
-      main.feedback = { good: correct, text: correct ? text : hint };
-      persist();
-      render();
-    }
-
-    function mainComplete() {
-      return '<section class="panel complete-card"><div class="complete-mark">✦</div><p class="eyebrow"><span class="eyebrow-mark"></span>主线已通关</p>' +
-        '<h1 style="font-size:clamp(28px,4vw,43px)">你把六步法走成了一条完整路线。</h1>' +
-        '<p style="max-width:700px;color:#a9c0b5;font-size:12px;line-height:1.9">做题时照这个次序落笔：进程分类 → 每类动作 → 需要的 P/V → 信号量初值 → 检查阻塞点 → 排除死锁。</p>' +
-        '<div class="code-grid"><article class="code-card"><div class="code-label">生产者 · 先申请空位</div><pre>while (1) {\n  produce();\n  P(empty); P(mutex);\n  put();\n  V(mutex); V(full);\n}</pre></article>' +
-        '<article class="code-card"><div class="code-label">消费者 · 先等产品</div><pre>while (1) {\n  P(full); P(mutex);\n  get();\n  V(mutex); V(empty);\n  consume();\n}</pre></article></div>' +
-        '<div class="end-row"><button class="btn btn-main" data-route="exam">挑战真题变式 →</button><button class="btn" data-main-restart>重新走主线</button></div></section>';
-    }
-
-    function renderStory() {
-      if (main.step >= MAIN_STEPS.length) return mainComplete();
-      const titles = ['先辨进程：题目里有几类执行者？','排动作：生产者访问缓冲区的顺序是什么？','补 P/V：消费者怎样安全地取货？','定初值：缓冲区刚开始为空','查等待：这两个 P 的次序安全吗？','综合自检：哪套答案完整且不易死锁？'];
-      const scenarios = [
-        '山脚仓库有一条生产线把货物放进环形缓冲区，另一条生产线负责取走货物。',
-        '产品已经生产完成；现在只安排访问共享缓冲区的几个关键动作。',
-        '消费者准备从共享缓冲区取走一件产品。',
-        '仓库容量为 N，题目明确说明开局时没有任何产品。',
-        '缓冲区已经装满；生产者若先拿锁，再等待空位，会发生什么？',
-        '把题意、PV 次序和初值合起来，选一个能完整交卷的判断。'
-      ];
-      const passed = save.clearedMain.includes(main.step);
-      const bar = '<div class="progress-wrap"><div class="progress-meta"><span>主线第 ' + (main.step+1) + ' / 6 关</span><span>' + save.clearedMain.length + ' 关已掌握</span></div><div class="progress-track"><div class="progress-fill" style="width:' + (save.clearedMain.length/6*100) + '%"></div></div></div>';
-      const ready = mainReady();
-      const action = main.feedback && main.feedback.good
-        ? '<button class="btn btn-main" data-main-next>' + (main.step===5?'完成主线':'下一关') + ' →</button>'
-        : '<button class="btn btn-main" data-main-submit ' + (ready?'':'disabled') + '>检查答案 →</button>';
-      const steps = MAIN_STEPS.map(function(label,index) {
-        const done = save.clearedMain.includes(index), active = index===main.step;
-        return '<li class="' + (done?'done ':'') + (active?'active':'') + '"><span class="step-dot">' + (done?'✓':index+1) +
-          '</span><span>' + label + '</span>' + (active?'<span class="now-tag">当前</span>':'') + '</li>';
-      }).join('');
-      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>主线 · 六步拆题</p><h1>沿着 PV 山路往上走</h1><p>答错会给你一个具体检查方向，不扣分、不计时。</p></div><span class="xp-pill">研习值 ' + save.xp + ' XP</span></div>' + bar +
-        '<div class="game-layout"><section class="panel play-panel"><div class="play-head"><div><p class="step-kicker">第 ' + (main.step+1) + ' 步 · ' + MAIN_STEPS[main.step] + '</p><h2>' + titles[main.step] + '</h2></div>' +
-        (passed?'<span class="tag" style="color:#9ce1ba">✓ 已通关</span>':'<span class="tag">行记关卡</span>') + '</div>' +
-        '<div class="scenario">' + scenarios[main.step] + '</div>' + mainQuestion() + feedbackHTML(main.feedback) +
-        '<div class="play-actions"><button class="btn" data-main-reset>↺ 本题重来</button>' + action + '</div></section>' +
-        '<aside class="side-stack"><section class="panel side-panel"><div class="side-title">六步解题卡<span class="side-muted">照这个顺序落笔</span></div><ol class="steps-list">' + steps + '</ol></section>' +
-        '<section class="panel side-panel"><div class="side-title">PV 口袋口诀</div><div class="sem-notes"><p><code>P(资源)</code>：资源够才往下走；不够就等待。</p><p><code>P(mutex)</code>：进入共享数据的临界区前申请。</p><p><code>V(mutex)</code>：离开临界区就释放。</p><p><code>V(同步量)</code>：动作完成后通知依赖它的进程。</p></div></section>' +
-        '<section class="panel side-panel tip-panel"><div class="side-title">自查提醒</div><p>先写动作，再决定每个动作前要不要 P；PV 写完后，再按资源含义定义信号量和初值。</p></section></aside></div>';
-    }
-
-    function setExamYear(year) {
-      exam.year = year;
-      exam.step = 0;
-      exam.choice = '';
-      exam.values = {};
-      exam.feedback = null;
-      render();
-    }
-
-    function examQuestion() {
-      if (exam.year === '2014') {
-        if (exam.step === 0) {
-          return '<div class="scenario">改编场景：青岚驿站有 6 个储物格。消费者一次承包 3 件货，承包期间其他消费者不能插队；生产者仍可继续补货。</div>' +
-            '<p style="color:#9db5ad;font-size:10px;line-height:1.8">给四个信号量配初值：empty 表示空位，full 表示货物；bufferLock 保护单次存取，batchLock 保证同一消费者取完整批。</p>' +
-            valueRows('exam',exam.values,[
-              {key:'empty',label:'empty',meaning:'空格数量'},
-              {key:'full',label:'full',meaning:'已有货物'},
-              {key:'bufferLock',label:'bufferLock',meaning:'单次访问互斥'},
-              {key:'batchLock',label:'batchLock',meaning:'整批消费者互斥'}
-            ],[0,1,3,6],exam.feedback?.good);
-        }
-        if (exam.step === 1) {
-          return '<div class="scenario">关键要求不是“等到凑够 3 件才开始”，而是一个消费者开始后要连续取完 3 件，其他消费者不能在中途接手。</div><div class="options">' +
-            optionHTML('exam','wrap','P(batchLock) 放在循环外；连续 3 次取货后再 V(batchLock)','整批期间独占消费者资格；每次取货仍单独拿放 bufferLock。',exam.choice==='wrap',exam.feedback?.good) +
-            optionHTML('exam','per-item','每取一件就 P(batchLock)，取完这一件就 V(batchLock)','这样其他消费者可在两件之间插队。',exam.choice==='per-item',exam.feedback?.good) +
-            optionHTML('exam','producer-lock','让生产者拿 batchLock，生产完 3 件后释放','该锁管的是消费者整批取货。',exam.choice==='producer-lock',exam.feedback?.good) + '</div>';
-        }
-        return '<div class="scenario">消费者已经拿到 batchLock，缓冲区还剩 1 件货。它取走后需要等待下一件；生产者有空位可用。</div><div class="options">' +
-          optionHTML('exam','producer-continues','生产者不需要 batchLock，仍能生产并 V(full)，消费者被唤醒后继续完成这一批','批次锁只限制消费者之间，不应挡住生产者补货。',exam.choice==='producer-continues',exam.feedback?.good) +
-          optionHTML('exam','mutual-deadlock','一定死锁，因为消费者拿着 batchLock 等货','生产者只需要 empty 和 bufferLock，不需要 batchLock。',exam.choice==='mutual-deadlock',exam.feedback?.good) +
-          optionHTML('exam','other-consumer','另一个消费者可以先拿走新货，batchLock 不影响消费者','',exam.choice==='other-consumer',exam.feedback?.good) + '</div>';
-      }
-      if (exam.step === 0) {
-        return '<div class="scenario">改编场景：单格数据舱一次只能放一个数据包。只有舱空才能写入；有包时可以读取或修改。</div><div class="options">' +
-          optionHTML('exam','c1-critical','需要。多个进程同时执行写入时，共享舱位的检查和写入要互斥','两个写进程可能同时看到空位，并发生重叠写入。',exam.choice==='c1-critical',exam.feedback?.good) +
-          optionHTML('exam','c1-not-critical','不需要。只要舱开始是空的，两个进程都能直接写','',exam.choice==='c1-not-critical',exam.feedback?.good) +
-          optionHTML('exam','c1-full','只要使用 full=1 就能解决所有并发写入','',exam.choice==='c1-full',exam.feedback?.good) + '</div>';
-      }
-      if (exam.step === 1) {
-        return '<div class="scenario">单格舱开始为空；P1 只写入一次，P2 只读取一次。目标是让读取发生在写入之后，并尽量少用信号量。</div><div class="options">' +
-          optionHTML('exam','ready-only','一个 dataReady=0 足够：P1 写完 V(dataReady)，P2 先 P(dataReady) 再读','同步关系本身保证先写后读，两段访问不会重叠。',exam.choice==='ready-only',exam.feedback?.good) +
-          optionHTML('exam','mutex-and-ready','必须同时用 mutex 和 dataReady','',exam.choice==='mutex-and-ready',exam.feedback?.good) +
-          optionHTML('exam','mutex-only','只用 mutex=1，不需要表示数据何时准备好','互斥只保证不同时访问，不能单独说明读必须等写。',exam.choice==='mutex-only',exam.feedback?.good) + '</div>';
-      }
-      return '<div class="scenario">单格舱开始已有数据；P1 和 P2 各修改一次同一个数据包。没有“谁先谁后”的额外要求。</div><div class="options">' +
-        optionHTML('exam','mutex-only-c3','一个 mutex=1 足够：两个修改过程互斥执行','已知数据存在，不需要再用 full 等待；mutex 保护并发修改。',exam.choice==='mutex-only-c3',exam.feedback?.good) +
-        optionHTML('exam','ready-c3','只用 dataReady=0，让两个进程互相通知','',exam.choice==='ready-c3',exam.feedback?.good) +
-        optionHTML('exam','no-sem-c3','不用信号量，因为两个进程操作相同','共享数据修改需要避免并发覆盖。',exam.choice==='no-sem-c3',exam.feedback?.good) + '</div>';
-    }
-
-    function examReady() {
-      if (exam.year === '2014' && exam.step === 0)
-        return ['empty','full','bufferLock','batchLock'].every(function(key){return Boolean(exam.values[key]);});
-      return Boolean(exam.choice);
-    }
-
-    function examQuestionTitle() {
-      if (exam.year === '2014') return ['给资源定义初值','批次锁应该包住哪段动作？','消费者等下一件时，会卡住生产者吗？'][exam.step] || '挑战完成';
-      return ['多个写入者会互相覆盖吗？','一次写、一次读，最少需要什么？','两个修改者并发时，什么锁够用？'][exam.step] || '挑战完成';
-    }
-
-    function examCheck() {
-      let correct=false,text='',hint='';
-      if(exam.year==='2014'&&exam.step===0){
-        correct=exam.values.empty==='6'&&exam.values.full==='0'&&exam.values.bufferLock==='1'&&exam.values.batchLock==='1';
-        text='初值配对正确：空位 6、货物 0；两把互斥锁都从 1 开始。注意 bufferLock 管一次存取，batchLock 管消费者完整批次。';
-        hint='开局没有货，所以 full=0、empty=6；互斥锁可用时初值 1。batchLock 也是互斥锁，初值为 1。';
-      }else if(exam.year==='2014'&&exam.step===1){
-        correct=exam.choice==='wrap';
-        text='对。批次锁包住整个 3 件循环；单件访问时再拿 bufferLock。两把锁的职责不同。';
-        hint='题干说“连续取完一批”。因此批次锁要在整批开始前申请、整批结束后释放；bufferLock 仍逐件使用。';
-      }else if(exam.year==='2014'){
-        correct=exam.choice==='producer-continues';
-        text='对。消费者可以持有 batchLock 等货，但生产者不需要这把锁，仍可补货并 V(full)。';
-        hint='看清每把锁保护谁：batchLock 只限制消费者之间，不能要求生产者也拿这把锁。';
-      }else if(exam.step===0){
-        correct=exam.choice==='c1-critical';
-        text='判断正确。多个写进程操作同一个舱位，检查和写入共享状态需要互斥保护。';
-        hint='问的是多个进程同时执行同一写操作：它们会不会竞争同一个缓冲区？共享写入要防止并发交错。';
-      }else if(exam.step===1){
-        correct=exam.choice==='ready-only';
-        text='对。一次写和一次读由 dataReady 串起来；P2 只有在 P1 写完并 V 后才能读，所以不需要额外 mutex。';
-        hint='限定只有一次写、一次读。先写后读的同步已经避免了二者同时访问；不要把互斥锁多加进去。';
-      }else{
-        correct=exam.choice==='mutex-only-c3';
-        text='对。数据已知存在，两个修改者只需要互斥访问；mutex=1 足够，不需要额外的资源可用同步量。';
-        hint='这题没有先后依赖，只有并发修改同一数据的问题。用 mutex 互斥，别把“有无数据”的同步信号量加进来。';
-      }
-      const id='exam-'+exam.year+'-'+exam.step;
-      if(correct){
-        if(!save.examCleared.includes(id))save.examCleared.push(id);
-        award(id,15);
-      }else{
-        addMistake(id,exam.year+' 真题变式：'+examQuestionTitle(),hint);
-      }
-      exam.feedback={good:correct,text:correct?text:hint};
-      persist();
-      render();
-    }
-
-    function examComplete() {
-      const is2014=exam.year==='2014';
-      const code=is2014
-        ? '<div class="code-grid"><article class="code-card"><div class="code-label">消费者 · 批次锁包住整批</div><pre>P(batchLock);\nfor (i = 0; i &lt; 3; i++) {\n  P(full); P(bufferLock);\n  get();\n  V(bufferLock); V(empty);\n}\nV(batchLock);</pre></article><article class="code-card"><div class="code-label">生产者 · 不需要 batchLock</div><pre>P(empty); P(bufferLock);\nput();\nV(bufferLock); V(full);</pre></article></div><p class="scenario" style="margin-top:12px">本关把原题的容量与批次参数改为 6 格、连续 3 件；重点练“消费者之间整批互斥”和“单次缓冲区访问互斥”是两把不同的锁。</p>'
-        : '<div class="code-grid"><article class="code-card"><div class="code-label">一次写入 → 一次读取：同步足够</div><pre>semaphore dataReady = 0;\nP1: write(B); V(dataReady);\nP2: P(dataReady); read(B);</pre></article><article class="code-card"><div class="code-label">两个修改者：互斥足够</div><pre>semaphore mutex = 1;\nP1: P(mutex); C3; V(mutex);\nP2: P(mutex); C3; V(mutex);</pre></article></div><p class="scenario" style="margin-top:12px">本关把单格数据包换成数据舱；分别比较“有先后依赖时用同步量”和“可能并发修改时用互斥量”。</p>';
-      return '<section class="panel complete-card"><div class="complete-mark">✦</div><p class="eyebrow"><span class="eyebrow-mark"></span>真题变式已通关</p><h1 style="font-size:clamp(27px,4vw,41px)">' +
-        (is2014?'你拆开了“整批连续取”的双层互斥。':'你分清了同步和互斥，各管一件事。') +
-        '</h1><p style="max-width:720px;color:#a9c0b5;font-size:12px;line-height:1.9">' +
-        (is2014?'bufferLock 保护共享缓冲区的一次存取，batchLock 保证一个消费者连续完成整批。不能把两把锁混成一把。':'dataReady 表示数据何时就绪；mutex 表示谁能同时修改共享数据。信号量要按题目限制来，尽量少而准确。') +
-        '</p>' + code + '<div class="end-row"><button class="btn btn-main" data-exam-retry>再挑战一次</button><button class="btn" data-route="sandbox">去沙盘推演 →</button></div></section>';
-    }
-
-    function renderExam() {
-      const complete=exam.step>=3;
-      const title=exam.year==='2014'?'批量取货：消费者连续拿完一批':'单格数据舱：同步还是互斥？';
-      const subtitle=exam.year==='2014'?'2014 · OS 第 47 题型原型 · 批次互斥、环形缓冲区':'2024 · OS 第 46 题型原型 · 临界区、最少信号量';
-      const nav='<aside class="panel exam-nav"><button class="exam-case' +(exam.year==='2014'?' active':'')+'" data-exam-year="2014"><span class="exam-year">2014 · OS 47 原型</span><strong>连续取货批次</strong><small>多生产者、多消费者；练批次锁与缓冲区锁。</small></button><button class="exam-case'+(exam.year==='2024'?' active':'')+'" data-exam-year="2024"><span class="exam-year">2024 · OS 46 原型</span><strong>单缓冲区操作</strong><small>C1 写、C2 读、C3 改；练同步/互斥和最少信号量。</small></button></aside>';
-      if(complete){
-        return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>真题秘境 · '+subtitle+'</p><h1>把真题考点变成了可操作的关卡</h1><p>题面和参数已改写，原型年份与考点保留，方便回到原卷复习。</p></div><span class="xp-pill">'+save.xp+' XP</span></div><div class="exam-grid">'+nav+'<div>'+examComplete()+'</div></div>';
-      }
-      const total=3;
-      const ready=examReady();
-      const question=examQuestion();
-      const action=exam.feedback&&exam.feedback.good
-        ? '<button class="btn btn-main" data-exam-next>'+(exam.step===total-1?'查看解题卡':'下一段')+' →</button>'
-        : '<button class="btn btn-main" data-exam-submit '+(ready?'':'disabled')+'>核对判断 →</button>';
-      const cleared=save.examCleared.filter(function(id){return id.indexOf('exam-'+exam.year+'-')===0;}).length;
-      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>真题秘境 · '+subtitle+'</p><h1>'+title+'</h1><p>更换故事与数字，保留真题的推理骨架；每小段都有解析。</p></div><span class="xp-pill">'+cleared+' / 3 小段完成</span></div>' +
-        '<div class="exam-grid">'+nav+'<section class="panel exam-work"><div class="exam-progress">关卡 '+(exam.step+1)+' / 3 · '+examQuestionTitle()+'</div>' +
-        '<div class="scenario">'+(exam.year==='2014'?'本题改编自环形仓库批量取货模型，参数改为容量 6、批量 3。先区分单次缓冲区互斥与整批消费者互斥。':'本题改编自单缓冲区多操作模型：写入只允许在空舱进行，读取和修改要求舱内有数据。')+'</div>' +
-        question+feedbackHTML(exam.feedback)+'<div class="play-actions"><button class="btn" data-exam-retry>↺ 重置本关</button>'+action+'</div>' +
-        '<div class="exam-credit">题源核对：2014 年 408 OS 第 47 题、2024 年 408 OS 第 46 题。此处只保留考点并改写场景、参数和交互。<div class="source-links" style="margin-top:7px"><a class="source" href="'+SOURCE_2014+'" target="_blank" rel="noreferrer">查看 2014 题本</a><a class="source" href="'+SOURCE_2024+'" target="_blank" rel="noreferrer">查看 2024 题本</a></div></div></section></div>';
-    }
-
-    function makeSimulation(capacity, mode, initial) {
-      const buffer=initial.slice();
       return {
-        capacity:capacity, mode:mode, buffer:buffer,
-        sem:{empty:capacity-buffer.length,full:buffer.length,mutex:1},
-        waiters:{empty:[],full:[],mutex:[]},
-        proc:{
-          producer:{pc:0,status:'ready',blockedOn:''},
-          consumer:{pc:0,status:'ready',blockedOn:''}
-        },
-        log:['沙盘已就绪。选择一个进程，再执行它的下一条操作。']
+        title:"互斥改写",tag:"2024 真题考点改编 · 临界区",
+        desc:"数据舱已有一张地图，两位修订者都要修改它。交错安排他们的操作，观察 mutex 如何保证同一时刻只有一人改图。",
+        objective:"让甲、乙都完成一次修改",hint:"数据已经存在；此处要防并发修改，不需要“等数据”的同步量。",
+        capacity:1,initial:["🗺️ 初稿"],goods:["🗺️"],
+        sem:{mutex:1},
+        actors:[
+          {id:"editorA",name:"甲修订者 · C3",icon:"🖋️",loop:false,ops:[P("mutex"),A("modify"),V("mutex")]},
+          {id:"editorB",name:"乙修订者 · C3",icon:"🪶",loop:false,ops:[P("mutex"),A("modify"),V("mutex")]}
+        ],
+        lesson:"互斥解决的是“不能同时改同一份共享数据”。初始已有数据，因此不用 full 等待；两个修改者各自 P(mutex) 进入临界区，V(mutex) 后让另一方继续。"
       };
     }
-
-    function simProgram(role) {
-      if(role==='producer'){
-        return sim.mode==='risk'
-          ? ['P(mutex)','P(empty)','put','V(mutex)','V(full)']
-          : ['P(empty)','P(mutex)','put','V(mutex)','V(full)'];
-      }
-      return ['P(full)','P(mutex)','get','V(mutex)','V(empty)'];
-    }
-
-    function opName(op) {
-      const names={
-        'P(empty)':'申请空位','P(full)':'等待产品','P(mutex)':'申请互斥锁',
-        'V(empty)':'归还空位','V(full)':'通知有产品','V(mutex)':'释放互斥锁',
-        'put':'放入一件产品','get':'取出一件产品'
+    function createGame(index,mode,preserveDeadlock){
+      stopAuto();
+      currentLevel=index;
+      const config=levelConfig(index,mode || (index===1?"danger":"safe"));
+      game={
+        config:config,mode:mode || (index===1?"danger":"safe"),
+        sem:Object.assign({},config.sem),
+        buffer:config.initial.map(function(item){return {label:item};}),
+        actors:config.actors.map(function(spec){return Object.assign({},spec,{pc:0,status:"ready",blockedOn:"",place:0,gets:0});}),
+        waiters:{},owners:{},logs:[],made:0,delivered:0,read:0,modified:0,batches:0,
+        seenDeadlock:Boolean(preserveDeadlock),deadlock:false,won:false,auto:false,
+        lastLesson:"",settledDeliveries:0
       };
-      return names[op]||op;
-    }
-
-    function logSim(message) {
-      sim.log.unshift(message);
-      sim.log=sim.log.slice(0,12);
-    }
-
-    function runSim(role) {
-      const proc=sim.proc[role];
-      if(proc.status==='blocked')return;
-      const program=simProgram(role);
-      const op=program[proc.pc];
-      const prefix=role==='producer'?'生产者':'消费者';
-      if(op.charAt(0)==='P'){
-        const key=op.slice(2,-1);
-        if(sim.sem[key]<=0){
-          proc.status='blocked';
-          proc.blockedOn=key;
-          sim.waiters[key].push(role);
-          logSim(prefix+'执行 '+op+'，资源不足，进入等待队列。');
-        }else{
-          sim.sem[key]-=1;
-          proc.pc=(proc.pc+1)%program.length;
-          logSim(prefix+'执行 '+op+' 成功，'+key+' 变为 '+sim.sem[key]+'。');
-        }
-      }else if(op.charAt(0)==='V'){
-        const key=op.slice(2,-1);
-        proc.pc=(proc.pc+1)%program.length;
-        if(sim.waiters[key].length){
-          const awakened=sim.waiters[key].shift();
-          const waiting=sim.proc[awakened];
-          waiting.status='ready'; waiting.blockedOn='';
-          waiting.pc=(waiting.pc+1)%simProgram(awakened).length;
-          logSim(prefix+'执行 '+op+'，直接唤醒等待 '+key+' 的'+(awakened==='producer'?'生产者':'消费者')+'。');
-        }else{
-          sim.sem[key]+=1;
-          logSim(prefix+'执行 '+op+'，'+key+' 变为 '+sim.sem[key]+'。');
-        }
-      }else if(op==='put'){
-        if(sim.buffer.length<sim.capacity){
-          sim.buffer.push('货物 '+(Date.now()%10000));
-          proc.pc=(proc.pc+1)%program.length;
-          logSim('生产者放入一件货物，缓冲区 '+sim.buffer.length+' / '+sim.capacity+'。');
-        }else logSim('缓冲区已满，放入动作无法继续；检查前面的 P(empty)。');
-      }else if(op==='get'){
-        if(sim.buffer.length){
-          const item=sim.buffer.shift();
-          proc.pc=(proc.pc+1)%program.length;
-          logSim('消费者取走 '+item+'，缓冲区 '+sim.buffer.length+' / '+sim.capacity+'。');
-        }else logSim('缓冲区为空，取出动作无法继续；检查前面的 P(full)。');
-      }
+      Object.keys(game.sem).forEach(function(key){game.waiters[key]=[];game.owners[key]=null;});
+      if(index===0) addLog("山雾散开。生产者和消费者都已就位，缓冲区当前为空。","info");
+      if(index===1) addLog(mode==="safe"?"安全次序已重开：先申请空位，再进入临界区。":"演示已载入：缓冲区满。试试生产者先 P(mutex) 再等 empty。","warn");
+      if(index===2) addLog("三件一批。先让甲、乙都尝试申请 batchLock，再调度持锁者连续取货。","info");
+      if(index===3) addLog("读手先等 dataReady；写手写完并 V(dataReady) 后，读手才能继续。","info");
+      if(index===4) addLog("两位修订者面对同一份地图。交错点按，观察 mutex 队列。","info");
       render();
     }
-
-    function simDeadlocked() {
-      return sim.proc.producer.status==='blocked'&&sim.proc.consumer.status==='blocked';
+    function stopAuto(){
+      if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+      if(game) game.auto=false;
     }
-
-    function processCard(role) {
-      const proc=sim.proc[role],name=role==='producer'?'生产者':'消费者';
-      const program=simProgram(role),op=program[proc.pc];
-      const status=proc.status==='blocked'?'等待 '+proc.blockedOn:'可运行';
-      return '<article class="process-card '+(proc.status==='blocked'?'blocked':'')+'"><h3>'+name+'<span class="proc-status">'+status+'</span></h3>' +
-        '<div class="next-op">下一步：'+op+' · '+opName(op)+'</div><button class="btn" data-sim-step="'+role+'" '+(proc.status==='blocked'?'disabled':'')+'>执行一步 →</button></article>';
+    function addLog(text,type,who){
+      game.logs.unshift({text:text,type:type||"info",who:who||""});
+      game.logs=game.logs.slice(0,12);
     }
-
-    function renderSandbox() {
-      const slots=Array.from({length:sim.capacity},function(_,index){
-        const item=sim.buffer[index];
-        return '<div class="buffer-slot '+(item?'filled':'')+'">'+(item?escapeHTML(item):'空缓冲位')+'</div>';
-      }).join('');
-      const trace=sim.log.map(function(line){return '<li>'+escapeHTML(line)+'</li>';}).join('');
-      const dead=simDeadlocked();
-      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>并发沙盘 · 手动调度</p><h1>亲手推演一次 P 和 V</h1><p>每点一次只运行一条操作。观察进程状态、缓冲区内容和信号量变化。</p></div><span class="xp-pill">不计时 · 可重置</span></div>' +
-        '<div class="sim-layout"><section class="panel sim-panel"><div class="side-title">场景设置<span class="side-muted">先选调度，再点进程执行</span></div>' +
-        '<div class="sim-toolbar"><button class="seg-btn '+(sim.mode==='safe'?'active':'')+'" data-sim-mode="safe">安全顺序</button><button class="seg-btn '+(sim.mode==='risk'?'active':'')+'" data-sim-mode="risk">危险顺序</button><button class="seg-btn" data-sim-demo>载入死锁演示</button><button class="seg-btn" data-sim-reset>重置</button></div>' +
-        '<div class="sim-toolbar"><span class="side-muted" style="padding:0 3px">缓冲区容量</span>'+[1,2,3].map(function(n){return '<button class="seg-btn '+(sim.capacity===n?'active':'')+'" data-sim-cap="'+n+'">'+n+' 格</button>';}).join('')+'</div>' +
-        '<div class="side-title" style="margin-top:18px">共享缓冲区 <span class="side-muted">'+sim.buffer.length+' / '+sim.capacity+' 件</span></div><div class="buffer-board">'+slots+'</div>' +
-        '<div class="sem-row"><div class="sem-token"><code>empty</code><strong>'+sim.sem.empty+'</strong></div><div class="sem-token"><code>full</code><strong>'+sim.sem.full+'</strong></div><div class="sem-token"><code>mutex</code><strong>'+sim.sem.mutex+'</strong></div></div>' +
-        '<div class="process-grid">'+processCard('producer')+processCard('consumer')+'</div>' +
-        (dead?'<div class="deadlock-banner"><strong>死锁出现了。</strong>两个进程都在等待，没人能继续释放对方需要的资源。看生产者是否拿着 mutex 等 empty。</div>':'') +
-        '</section><aside class="side-stack"><section class="panel side-panel"><div class="side-title">最近操作<span class="side-muted">新记录在上</span></div><ol class="trace">'+trace+'</ol></section>' +
-        '<section class="panel side-panel tip-panel"><div class="side-title">观察重点</div><p>安全顺序先 P(empty) / P(full)，再 P(mutex)。危险顺序让生产者先拿 mutex 再等空位；缓冲区满时，它可能挡住消费者取货。</p></section>' +
-        '<section class="panel side-panel"><div class="side-title">当前程序顺序</div><div class="sem-notes"><p><code>Producer:</code> '+(sim.mode==='risk'?'P(mutex) → P(empty)':'P(empty) → P(mutex)')+' → put → V(mutex) → V(full)</p><p><code>Consumer:</code> P(full) → P(mutex) → get → V(mutex) → V(empty)</p></div></section></aside></div>';
+    function semName(key){
+      return {empty:"empty 空位",full:"full 产品",mutex:"mutex 互斥",bufferLock:"bufferLock 单次存取",batchLock:"batchLock 整批资格",dataReady:"dataReady 数据就绪"}[key]||key;
     }
-
-    function makePractice() {
-      const capacity=3+Math.floor(Math.random()*6);
-      const batch=2+Math.floor(Math.random()*4);
-      return {capacity:capacity,batch:batch,round:0,choice:'',values:{},feedback:null,id:'practice-'+Date.now()};
+    function opCode(op){
+      if(op.kind==="P"||op.kind==="V")return op.kind+"("+op.key+")";
+      return {put:"放入货物",get:"取出货物",write:"写入数据",read:"读取数据",modify:"修改数据"}[op.kind]||op.kind;
     }
-
-    function renderPractice() {
-      const ready=practice.round===0
-        ? ['empty','full','mutex','batch'].every(function(key){return Boolean(practice.values[key]);})
-        : Boolean(practice.choice);
-      const question=practice.round===0
-        ? '<div class="scenario">随机题：容量 '+practice.capacity+' 的补给仓开局为空；消费者每次连续拿 '+practice.batch+' 件，其他消费者不能插队。给 empty、full、mutex、batchLock 配初值。</div>' +
-          valueRows('practice',practice.values,[
-            {key:'empty',label:'empty',meaning:'空位数量'},
-            {key:'full',label:'full',meaning:'产品数量'},
-            {key:'mutex',label:'mutex',meaning:'单次存取互斥'},
-            {key:'batch',label:'batchLock',meaning:'整批消费者互斥'}
-          ],[0,1,practice.capacity,practice.batch],false)
-        : '<div class="scenario">新一轮容量 '+practice.capacity+'，缓冲区可能已满。生产者申请资源和进入临界区，哪个次序更安全？</div><div class="options">' +
-          optionHTML('practice','safe-order','P(empty) → P(mutex) → put → V(mutex) → V(full)','先申请资源位，再拿锁。',practice.choice==='safe-order',practice.feedback?.good) +
-          optionHTML('practice','risky-order','P(mutex) → P(empty) → put → V(full) → V(mutex)','可能持锁等待资源，通知也放在释放锁之前。',practice.choice==='risky-order',practice.feedback?.good) +
-          '</div>';
-      const pips='<div class="round-pips"><span class="active"></span><span class="'+(practice.round===1?'active':'')+'"></span></div>';
-      const action=practice.feedback&&practice.feedback.good
-        ? '<button class="btn btn-main" data-practice-next>'+(practice.round===0?'下一段 →':'完成本轮 →')+'</button>'
-        : '<button class="btn btn-main" data-practice-submit '+(ready?'':'disabled')+'>检查答案 →</button>';
-      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>随机试炼 · 参数每轮变化</p><h1>别背答案，重新读题</h1><p>容量、连续取货数量都会变化，先从题意推信号量。</p></div><button class="btn" data-practice-new>抽一张新变式 ↻</button></div>' +
-        '<section class="panel practice-card"><div class="side-title">变式 '+practice.capacity+' 格 · 连取 '+practice.batch+' 件<span class="side-muted">'+(practice.round===0?'1 / 2 · 初值配对':'2 / 2 · P 顺序诊断')+'</span></div>' +
-        pips+question+feedbackHTML(practice.feedback)+'<div class="play-actions"><button class="btn" data-practice-new>换一张题</button>'+action+'</div></section>';
+    function opPlace(op){
+      if(op.kind==="P")return op.key==="mutex"||op.key==="bufferLock"?47:27;
+      if(op.kind==="V")return op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock"?75:95;
+      return 60;
     }
-
-    function checkPractice() {
-      let correct=false,text='',hint='';
-      if(practice.round===0){
-        correct=practice.values.empty===String(practice.capacity)&&practice.values.full==='0'&&practice.values.mutex==='1'&&practice.values.batch==='1';
-        text='对。空位数等于容量 '+practice.capacity+'，full=0；两类互斥锁初值都为 1。';
-        hint='缓冲区开局为空：empty='+practice.capacity+'、full=0。mutex 和 batchLock 都表示可进入的互斥锁，初值为 1。';
+    function explain(op,success,actor){
+      if(op.kind==="P"&&!success)return semName(op.key)+"不足，"+actor.name+"阻塞在资源门口，后面的操作不会执行。";
+      if(op.kind==="P")return op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock"
+        ? "信号量减 1，"+actor.name+"拿到"+semName(op.key)+"，进入受保护区域。"
+        : "信号量减 1，"+actor.name+"确认资源可用，继续往山门走。";
+      if(op.kind==="V")return op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock"
+        ? actor.name+"释放"+semName(op.key)+"；若有人等待，会直接唤醒队首。"
+        : actor.name+"发出"+semName(op.key)+"通知，等待进程可以继续。";
+      return {
+        put:"货物放入共享缓冲区，full 增加，等待消费者可以醒来。",
+        get:"货物离开共享缓冲区，消费者腾出了一个空位。",
+        write:"数据包写入唯一的数据舱。",
+        read:"读手取走数据包，单次同步任务完成。",
+        modify:"修改已提交。互斥锁保护这次对共享数据的更新。"
+      }[op.kind]||"一次共享操作完成。";
+    }
+    function nextOp(actor){
+      if(actor.status==="done")return null;
+      return actor.ops[actor.pc] || null;
+    }
+    function actorStatus(actor){
+      if(actor.status==="blocked")return "等待 "+semName(actor.blockedOn);
+      if(actor.status==="done")return "这段已完成";
+      return "可以调度";
+    }
+    function wakeOne(key,by){
+      const queue=game.waiters[key]||[];
+      if(!queue.length){
+        game.sem[key]=(game.sem[key]||0)+1;
+        return "";
+      }
+      const id=queue.shift();
+      const actor=game.actors.find(function(item){return item.id===id;});
+      if(actor){
+        actor.status="ready";actor.blockedOn="";actor.pc+=1;actor.place=opPlace(actor.ops[actor.pc]||{kind:"put"});
+        if(key==="mutex"||key==="bufferLock"||key==="batchLock")game.owners[key]=id;
+        return actor.name;
+      }
+      return "";
+    }
+    function finishActor(actor){
+      if(actor.pc<actor.ops.length)return;
+      if(actor.loop){
+        actor.pc=0;actor.place=0;actor.status="ready";
+        return;
+      }
+      actor.status="done";actor.place=98;
+      if(actor.batch&&actor.gets>=actor.batch){
+        game.batches+=1;
+        addLog(actor.name+"完成连续 "+actor.batch+" 件整批取货，才释放 batchLock。","good",actor.name);
+      }
+    }
+    function stepActor(id,fromAuto){
+      if(!game||game.won)return;
+      const actor=game.actors.find(function(item){return item.id===id;});
+      if(!actor||actor.status!=="ready")return;
+      if(game.auto&&!fromAuto)stopAuto();
+      const op=nextOp(actor);
+      if(!op)return;
+      const code=opCode(op);
+      actor.place=opPlace(op);
+      if(op.kind==="P"){
+        if((game.sem[op.key]||0)<=0){
+          actor.status="blocked";actor.blockedOn=op.key;
+          if(!game.waiters[op.key])game.waiters[op.key]=[];
+          if(!game.waiters[op.key].includes(actor.id))game.waiters[op.key].push(actor.id);
+          addLog(actor.name+"执行 "+code+"：资源不足，进入等待队列。","warn",actor.name);
+          game.lastLesson=explain(op,false,actor);
+          checkDeadlock();
+          render();
+          return;
+        }
+        game.sem[op.key]-=1;
+        if(op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock")game.owners[op.key]=actor.id;
+        actor.pc+=1;
+        addLog(actor.name+"执行 "+code+" 成功，"+semName(op.key)+" → "+game.sem[op.key]+"。","info",actor.name);
+        game.lastLesson=explain(op,true,actor);
+        flash(op.key,actor.id);
+      }else if(op.kind==="V"){
+        actor.pc+=1;
+        if(op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock")game.owners[op.key]=null;
+        const awakened=wakeOne(op.key,actor.id);
+        if(op.key==="empty"&&(currentLevel===0||currentLevel===1)&&actor.id==="consumer")game.settledDeliveries+=1;
+        addLog(actor.name+"执行 "+code+"。"+(awakened?"唤醒 "+awakened+"。":semName(op.key)+" → "+game.sem[op.key]+"。"),"info",actor.name);
+        game.lastLesson=explain(op,true,actor);
+        flash(op.key,actor.id);
+      }else if(op.kind==="put"){
+        if(game.buffer.length>=game.config.capacity){
+          actor.status="blocked";actor.blockedOn="empty";
+          game.waiters.empty.push(actor.id);
+          addLog(actor.name+"到达货架时发现已满，等待 empty。","warn",actor.name);
+          game.lastLesson="缓冲区满时不能继续放货。正常程序应在进入临界区之前 P(empty)。";
+          checkDeadlock();render();return;
+        }
+        const label=game.config.goods[game.made%game.config.goods.length]||"📦";
+        game.buffer.push({label:label});game.made+=1;actor.pc+=1;
+        addLog(actor.name+"放入 "+label+"，缓冲区 "+game.buffer.length+" / "+game.config.capacity+"。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }else if(op.kind==="get"){
+        if(!game.buffer.length){
+          actor.status="blocked";actor.blockedOn="full";
+          game.waiters.full.push(actor.id);
+          addLog(actor.name+"到达货架时没有货，等待 full。","warn",actor.name);
+          game.lastLesson="消费者在没有产品时阻塞。等生产者放货并 V(full)，它才能继续。";
+          checkDeadlock();render();return;
+        }
+        const item=game.buffer.shift();game.delivered+=1;actor.gets+=1;actor.pc+=1;
+        addLog(actor.name+"取走 "+item.label+"，缓冲区腾出一个位置。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }else if(op.kind==="write"){
+        if(game.buffer.length){
+          addLog(actor.name+"尝试写入，但单格数据舱不为空。","warn",actor.name);
+          game.lastLesson="这一关的写手只写一次；读手完成后数据舱才会腾空。";
+          render();return;
+        }
+        game.buffer.push({label:"🗺️ 数据包"});game.made+=1;actor.pc+=1;
+        addLog(actor.name+"写入一个数据包。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }else if(op.kind==="read"){
+        if(!game.buffer.length){
+          actor.status="blocked";actor.blockedOn="dataReady";
+          game.waiters.dataReady.push(actor.id);
+          addLog(actor.name+"还没收到就绪信号，停在数据舱外。","warn",actor.name);
+          game.lastLesson="读操作必须等写手执行 V(dataReady)。";
+          render();return;
+        }
+        const item=game.buffer.shift();game.read+=1;actor.pc+=1;
+        addLog(actor.name+"读取 "+item.label+"，同步关系完成。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }else if(op.kind==="modify"){
+        game.modified+=1;
+        if(game.buffer.length)game.buffer[0].label="🗺️ 地图 v"+(game.modified+1);
+        actor.pc+=1;
+        addLog(actor.name+"在临界区完成修改，当前版本 v"+(game.modified+1)+"。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }
+      finishActor(actor);
+      checkDeadlock();
+      checkGoal();
+      render();
+      lastFlash=actor.id;
+      setTimeout(function(){if(lastFlash===actor.id){lastFlash="";render();}},500);
+    }
+    function flash(key,actorId){
+      lastSemFlash=key;
+      lastFlash=actorId;
+      setTimeout(function(){if(lastSemFlash===key){lastSemFlash="";render();}},430);
+    }
+    function checkDeadlock(){
+      if(game.deadlock)return;
+      const active=game.actors.filter(function(actor){return actor.status!=="done";});
+      const allBlocked=active.length>0&&active.every(function(actor){return actor.status==="blocked";});
+      if(!allBlocked)return;
+      game.deadlock=true;
+      addLog("死锁形成：所有未完成进程都在等待，没人能释放它们需要的资源。","danger");
+      if(currentLevel===1&&!game.seenDeadlock){
+        game.seenDeadlock=true;
+        if(!save.deadlockBonus){save.deadlockBonus=true;save.xp+=8;persist();}
+      }
+    }
+    function goalProgress(){
+      if(currentLevel===0)return {n:Math.min(game.settledDeliveries,3),total:3};
+      if(currentLevel===1){
+        if(!game.seenDeadlock)return {n:0,total:2,label:"步骤 1 / 2 · 观察死锁"};
+        return {n:1+(game.settledDeliveries?1:0),total:2,label:game.settledDeliveries?"步骤 2 / 2 · 已疏通":"步骤 2 / 2 · 安全送货"};
+      }
+      if(currentLevel===2)return {n:Math.min(game.batches,1),total:1};
+      if(currentLevel===3)return {n:Math.min(game.read,1),total:1};
+      return {n:Math.min(game.modified,2),total:2};
+    }
+    function checkGoal(){
+      let done=false;
+      if(currentLevel===0)done=game.settledDeliveries>=3;
+      else if(currentLevel===1)done=game.seenDeadlock&&game.mode==="safe"&&game.settledDeliveries>=1;
+      else if(currentLevel===2)done=game.batches>=1;
+      else if(currentLevel===3)done=game.read>=1;
+      else done=game.modified>=2&&game.actors.every(function(actor){return actor.status==="done";});
+      if(done&&!game.won){
+        game.won=true;
+        if(!save.cleared.includes(currentLevel)){
+          save.cleared.push(currentLevel);
+          save.xp+=25;
+          save.unlocked=Math.max(save.unlocked,Math.min(5,currentLevel+2));
+          persist();
+        }
+        addLog("关卡目标完成。山路已向前展开。","good");
+      }
+    }
+    function resetCurrent(){
+      const wasSeen=game.seenDeadlock;
+      createGame(currentLevel,game.mode,wasSeen);
+    }
+    function startAuto(){
+      if(game.auto){stopAuto();render();return;}
+      game.auto=true;render();
+      autoTimer=setInterval(function(){
+        if(!game||game.won){stopAuto();render();return;}
+        const ready=game.actors.filter(function(actor){return actor.status==="ready";});
+        if(!ready.length){stopAuto();addLog("没有可运行的进程。检查等待队列或重开场景。","warn");render();return;}
+        const chosen=ready[autoCursor%ready.length];
+        autoCursor+=1;
+        stepActor(chosen.id,true);
+      },680);
+    }
+    function renderMap(){
+      const root=document.getElementById("stage-list");
+      root.innerHTML=levelNames.map(function(name,index){
+        const unlocked=index<save.unlocked;
+        const cleared=save.cleared.includes(index);
+        return '<button class="stage-btn '+(currentLevel===index?"active":"")+'" data-action="stage" data-index="'+index+'" '+(unlocked?"":"disabled")+'>'
+          +'<span class="stage-num">'+(cleared?"✓":String(index+1).padStart(2,"0"))+'</span>'
+          +'<span class="stage-copy"><b>'+esc(name)+'</b><small>'+esc(levelShort[index])+'</small></span>'
+          +(cleared?'<span class="stage-check">✦</span>':'')+'</button>';
+      }).join("");
+    }
+    function renderModeBar(){
+      const root=document.getElementById("mode-bar");
+      if(currentLevel!==1){root.innerHTML="";return;}
+      root.innerHTML='<button class="control-btn '+(game.mode==="danger"?"active":"")+'" data-action="mode" data-mode="danger">⚠ 危险次序</button>'
+        +'<button class="control-btn '+(game.mode==="safe"?"active":"")+'" data-action="mode" data-mode="safe">✦ 安全次序</button>'
+        +'<span class="tip-chip">先体验锁内等待，再切安全次序</span>';
+    }
+    function renderBuffer(){
+      const grid=document.getElementById("buffer-grid");
+      const total=game.config.capacity;
+      grid.innerHTML=Array.from({length:total},function(_,index){
+        const item=game.buffer[index];
+        return '<div class="buffer-slot '+(item?"filled":"")+(lastFlash==="buffer"?" pulse":"")+'">'
+          +(item?'<span><span class="good-icon">'+esc(item.label.split(" ")[0])+'</span><span class="slot-label">'+esc(item.label.split(" ").slice(1).join(" "))+'</span></span>':'<span>空位 '+(index+1)+'</span>')
+          +'</div>';
+      }).join("");
+      document.getElementById("buffer-count").textContent=game.buffer.length+" / "+total+" 件";
+    }
+    function renderSemaphores(){
+      const labels={empty:"可放入的空位",full:"可取出的货物",mutex:"共享区互斥",bufferLock:"单次访问锁",batchLock:"整批消费者锁",dataReady:"数据就绪通知"};
+      document.getElementById("semaphore-row").innerHTML=Object.keys(game.sem).map(function(key){
+        return '<div class="sem-card '+(lastSemFlash===key?"changed":"")+'"><div class="sem-top"><code>'+key+'</code><span>'+labels[key]+'</span></div><div class="sem-value"><strong>'+game.sem[key]+'</strong><span>当前值</span></div></div>';
+      }).join("");
+    }
+    function renderActors(){
+      document.getElementById("actor-list").innerHTML=game.actors.map(function(actor){
+        const op=nextOp(actor);
+        const code=op?opCode(op):"本段已完成";
+        const disabled=actor.status!=="ready"||game.won;
+        const progress=actor.place||0;
+        return '<article class="actor-card '+actor.status+' '+(lastFlash===actor.id?"active":"")+'">'
+          +'<div class="actor-head"><div class="actor-name"><span class="actor-emoji">'+actor.icon+'</span>'+esc(actor.name)+'</div><span class="actor-status">'+esc(actorStatus(actor))+'</span></div>'
+          +'<div class="lane"><div class="lane-line"></div><span class="lane-node"></span><span class="lane-node"></span><span class="lane-node"></span><span class="lane-node"></span><span class="lane-node"></span>'
+          +'<span class="traveler" style="--pos:'+progress+'%"><span class="traveler-face">'+actor.icon+'</span></span>'
+          +'<div class="lane-labels"><span>出发</span><span>申请资源</span><span>临界区</span><span>释放</span><span>通知</span></div></div>'
+          +'<div class="actor-footer"><span class="next-op">下一条：<b>'+esc(code)+'</b></span><button class="run-step" data-action="step" data-id="'+actor.id+'" '+(disabled?"disabled":"")+'>执行一步 →</button></div>'
+          +'</article>';
+      }).join("");
+    }
+    function renderGoal(){
+      const goal=goalProgress();
+      document.getElementById("objective-text").textContent=game.config.objective;
+      document.getElementById("objective-hint").textContent=goal.label||game.config.hint;
+      document.getElementById("goal-count").textContent=goal.label?goal.label:goal.n+" / "+goal.total;
+      document.getElementById("goal-fill").style.width=Math.round(goal.n/goal.total*100)+"%";
+      document.getElementById("objective-icon").textContent=game.won?"✓":currentLevel===1?"⚡":"✦";
+    }
+    function renderLogs(){
+      document.getElementById("log-list").innerHTML=game.logs.map(function(item){
+        return '<li class="log-item '+item.type+'">'+(item.who?'<strong>'+esc(item.who.split(" · ")[0])+'</strong>':'')+'<span>'+esc(item.text)+'</span></li>';
+      }).join("");
+    }
+    function renderBanner(){
+      const root=document.getElementById("status-banner");
+      if(game.deadlock){
+        root.innerHTML='<div class="deadlock-banner"><span class="banner-icon">⛓</span><span><b>死锁出现了。</b> 生产者持有 mutex 等 empty，消费者又等 mutex；所有人都停在等待队列。点“安全次序”重开，让消费者先腾出位置。</span></div>';
+      }else if(game.won){
+        root.innerHTML='<div class="win-banner"><span class="banner-icon">✦</span><span><b>这一段走通啦。</b> '+(currentLevel===0?"你已经亲手让 empty、full 与 mutex 配合起来。":"操作轨迹和资源变化都已记录，继续向前探索下一个同步场景。")+'</span></div>';
       }else{
-        correct=practice.choice==='safe-order';
-        text='对。先申请空位，再进入互斥区。这个原则不随缓冲区容量变化。';
-        hint='考虑缓冲区已满：如果先拿 mutex 再等待 empty，可能持锁阻止消费者进入。';
+        root.innerHTML="";
       }
-      const id=practice.id+'-'+practice.round;
-      if(correct)award(id,12);
-      else addMistake(id,'随机试炼：'+(practice.round===0?'信号量初值':'P 操作顺序'),hint);
-      practice.feedback={good:correct,text:correct?text:hint};
-      persist(); render();
     }
-
-    function renderReview() {
-      if(!save.mistakes.length){
-        return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>错题回看 · 复盘记录</p><h1>把容易混的地方收起来</h1><p>练习时答错的知识点会自动记在这里。</p></div><span class="xp-pill">当前 0 条</span></div>' +
-          '<section class="panel empty-state"><div class="empty-mark">✓</div><h2>错题本暂时空着</h2><p>可以去主线、真题或沙盘闯几关。答错后会记下具体知识点和下一次的检查方向。</p><button class="btn btn-main" data-route="exam">去真题秘境 →</button></section>';
-      }
-      const cards=save.mistakes.map(function(item){
-        return '<article class="mistake-card"><strong>'+escapeHTML(item.title)+'</strong><p>'+escapeHTML(item.principle)+'</p></article>';
-      }).join('');
-      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>错题回看 · 把误区变成经验</p><h1>这些点再走一遍就稳了</h1><p>每条记录都保留了对应检查方向，不只记“选错了”。</p></div><button class="btn" data-review-clear>清空错题记录</button></div>' +
-        '<div class="review-grid">'+cards+'</div><div class="end-row"><button class="btn btn-main" data-route="practice">去随机试炼 →</button></div>';
+    function render(){
+      if(!game)return;
+      document.getElementById("stage-kicker").textContent="并发山谷 · 第 "+(currentLevel+1)+" 关 · "+game.config.tag;
+      document.getElementById("stage-title").textContent=game.config.title;
+      document.getElementById("stage-desc").textContent=game.config.desc;
+      document.getElementById("level-badge").textContent=save.cleared.includes(currentLevel)?"已通关 · 可重玩":"动画调度中";
+      document.getElementById("xp").textContent=save.xp;
+      document.getElementById("progress").textContent=save.unlocked+" / 5";
+      document.getElementById("lesson-tag").textContent=game.lastLesson?"刚刚发生":"本关知识点";
+      document.getElementById("journal").innerHTML="<b>"+(game.lastLesson?"动作释义":"本关原理")+"：</b> "+esc(game.lastLesson||game.config.lesson);
+      document.getElementById("chips").innerHTML=(currentLevel===2?'<span class="tip-chip">整批锁 batchLock</span><span class="tip-chip">单次锁 bufferLock</span>':currentLevel===3?'<span class="tip-chip">同步 dataReady</span><span class="tip-chip">一次写、一次读</span>':currentLevel===4?'<span class="tip-chip">互斥 mutex</span><span class="tip-chip">同一临界区</span>':'<span class="tip-chip">手动调度</span><span class="tip-chip">实时看 PV</span>');
+      document.getElementById("auto-btn").textContent=game.auto?"Ⅱ 暂停轮转":"▶ 自动轮转";
+      document.getElementById("auto-btn").classList.toggle("active",game.auto);
+      const next=document.getElementById("next-btn");
+      next.hidden=!(game.won&&currentLevel<4&&currentLevel+1<save.unlocked);
+      renderMap();renderModeBar();renderGoal();renderBuffer();renderSemaphores();renderActors();renderLogs();renderBanner();
     }
-
-    function render() {
-      updateRank();
-      document.querySelectorAll('[data-route]').forEach(function(item){
-        item.classList.toggle('active',item.getAttribute('data-route')===route&&item.classList.contains('nav-link'));
-      });
-      if(route==='map')document.getElementById('app').innerHTML=renderMap();
-      else if(route==='story')document.getElementById('app').innerHTML=renderStory();
-      else if(route==='exam')document.getElementById('app').innerHTML=renderExam();
-      else if(route==='sandbox')document.getElementById('app').innerHTML=renderSandbox();
-      else if(route==='practice')document.getElementById('app').innerHTML=renderPractice();
-      else document.getElementById('app').innerHTML=renderReview();
-    }
-
-    function resetExam() {
-      exam.step=0; exam.choice=''; exam.values={}; exam.feedback=null;
-      render();
-    }
-
-    function resetMain() {
-      main.choice=''; main.order=[]; main.values={empty:'',full:'',mutex:''}; main.feedback=null;
-      render();
-    }
-
-    function resetSimulation(mode, capacity) {
-      const nextCapacity=capacity||sim.capacity;
-      sim=makeSimulation(nextCapacity,mode||sim.mode,[]);
-      render();
-    }
-
-    function deadlockDemo() {
-      sim=makeSimulation(1,'risk',['已缓存数据包']);
-      logSim('载入演示：缓冲区已满。让生产者先拿 mutex，再让它等待 empty。');
-      save.deadlockSolved=false;
-      render();
-    }
-
-    document.addEventListener('click',function(event){
-      const el=event.target.closest('button,a[data-route]');
-      if(!el)return;
-      if(el.dataset.route){if(el.tagName==='A')event.preventDefault();route=el.dataset.route;render();return;}
-      if(el.dataset.mainStage!==undefined){
-        main.step=Number(el.dataset.mainStage);resetMain();route='story';render();return;
+    document.addEventListener("click",function(event){
+      const button=event.target.closest("[data-action]");
+      if(!button)return;
+      const action=button.dataset.action;
+      if(action==="stage"){
+        const index=Number(button.dataset.index);
+        if(index<save.unlocked)createGame(index,index===1?"danger":"safe",false);
+      }else if(action==="step"){
+        stepActor(button.dataset.id,false);
+      }else if(action==="auto"){
+        startAuto();
+      }else if(action==="reset"){
+        resetCurrent();
+      }else if(action==="mode"){
+        const seen=game.seenDeadlock;
+        createGame(currentLevel,button.dataset.mode,seen);
+      }else if(action==="next"){
+        if(currentLevel+1<save.unlocked)createGame(currentLevel+1,currentLevel+1===1?"danger":"safe",false);
+      }else if(action==="hint"){
+        game.lastLesson=game.config.lesson;
+        addLog("打开了本关札记。结合当前进程位置观察关键的 P/V。","info");
+        render();
       }
-      if(el.dataset.mainChoice){
-        main.choice=el.dataset.mainChoice;main.feedback=null;render();return;
-      }
-      if(el.dataset.mainAction){
-        const index=main.order.indexOf(el.dataset.mainAction);
-        if(index>=0)main.order.splice(index,1);else main.order.push(el.dataset.mainAction);
-        main.feedback=null;render();return;
-      }
-      if(el.dataset.mainRemove!==undefined){
-        main.order.splice(Number(el.dataset.mainRemove),1);main.feedback=null;render();return;
-      }
-      if(el.dataset.mainValueKey){
-        main.values[el.dataset.mainValueKey]=el.dataset.value;main.feedback=null;render();return;
-      }
-      if(el.dataset.mainSubmit!==undefined){
-        if(main.step===0){
-          const good=main.choice==='roles';
-          const text=good?'对。先把生产者和消费者分开写，每类进程各有自己的循环动作。':'先数执行主体：负责放产品的是生产者，负责取产品的是消费者，通常各写一个循环函数。';
-          if(good){if(!save.clearedMain.includes(0))save.clearedMain.push(0);award('main-0',10);}else addMistake('main-0','主线：辨认进程类别','生产者和消费者是两类执行主体，各写一个函数。');
-          main.feedback={good:good,text:text};persist();render();return;
-        }
-        if(main.step===1){
-          const good=main.order.length===MAIN_ANSWER.length&&main.order.every(function(item,index){return item===MAIN_ANSWER[index];});
-          const text=good?'顺序对了：先申请空位，再拿互斥锁；写入后先放锁，再通知消费者。':'生产者先 P(empty)，再 P(mutex)；写入后 V(mutex)，最后 V(full)。';
-          if(good){if(!save.clearedMain.includes(1))save.clearedMain.push(1);award('main-1',10);}else addMistake('main-1','主线：生产者动作排序','P(empty) → P(mutex) → 写入 → V(mutex) → V(full)。');
-          main.feedback={good:good,text:text};persist();render();return;
-        }
-        if(main.step===2){
-          const good=main.choice==='consumer';
-          const text=good?'对。消费者先 P(full) 等产品，再用 mutex 保护取出动作；之后 V(mutex) 和 V(empty)。':'消费者先 P(full) 确认有产品，再 P(mutex)；取出后 V(mutex)，最后 V(empty)。';
-          if(good){if(!save.clearedMain.includes(2))save.clearedMain.push(2);award('main-2',10);}else addMistake('main-2','主线：消费者 PV 次序','资源 P(full) 要先于互斥 P(mutex)。');
-          main.feedback={good:good,text:text};persist();render();return;
-        }
-        if(main.step===3){
-          const good=main.values.empty==='N'&&main.values.full==='0'&&main.values.mutex==='1';
-          const text=good?'初值正确：empty=N、full=0、mutex=1。':'开局空仓：empty=N、full=0；mutex 可用，初值 1。';
-          if(good){if(!save.clearedMain.includes(3))save.clearedMain.push(3);award('main-3',10);}else addMistake('main-3','主线：信号量初值','缓冲区空时 empty=N、full=0，mutex 初值 1。');
-          main.feedback={good:good,text:text};persist();render();return;
-        }
-        if(main.step===4){
-          const good=main.choice==='deadlock';
-          const text=good?'会卡死：生产者持有 mutex 等 empty；消费者无法进入缓冲区取产品，也就无法释放空位。':'把缓冲区设成已满：谁拿着 mutex 等 empty？消费者能不能进去取货并腾出空位？';
-          if(good){if(!save.clearedMain.includes(4))save.clearedMain.push(4);award('main-4',10);}else addMistake('main-4','主线：持锁等待导致死锁','持有 mutex 的生产者等待 empty，会阻止消费者取货。');
-          main.feedback={good:good,text:text};persist();render();return;
-        }
-        const good=main.choice==='audit';
-        const text=good?'检查完整了：资源 P、mutex P、临界区、V 释放顺序和初值都对得上。':'逐项核对资源 P、mutex P、临界区、V 的释放顺序和三种信号量初值。';
-        if(good){if(!save.clearedMain.includes(5))save.clearedMain.push(5);award('main-5',10);}else addMistake('main-5','主线：完整解法自检','资源 P 在 mutex P 前；互斥临界区后释放锁，并通知资源变化。');
-        main.feedback={good:good,text:text};persist();render();return;
-      }
-      if(el.dataset.mainNext!==undefined){
-        main.step+=1;resetMainAnswer();render();return;
-      }
-      if(el.dataset.mainReset!==undefined){resetMain();return;}
-      if(el.dataset.mainRestart!==undefined){main.step=0;resetMainAnswer();route='story';render();return;}
-
-      if(el.dataset.examYear){exam.year=el.dataset.examYear;resetExam();return;}
-      if(el.dataset.examChoice){exam.choice=el.dataset.examChoice;exam.feedback=null;render();return;}
-      if(el.dataset.examValueKey){exam.values[el.dataset.examValueKey]=el.dataset.value;exam.feedback=null;render();return;}
-      if(el.dataset.examSubmit!==undefined){examCheck();return;}
-      if(el.dataset.examNext!==undefined){exam.step+=1;exam.choice='';exam.values={};exam.feedback=null;render();return;}
-      if(el.dataset.examRetry!==undefined){resetExam();return;}
-
-      if(el.dataset.simMode){resetSimulation(el.dataset.simMode);return;}
-      if(el.dataset.simCap){resetSimulation(sim.mode,Number(el.dataset.simCap));return;}
-      if(el.dataset.simStep){runSim(el.dataset.simStep);return;}
-      if(el.dataset.simReset!==undefined){resetSimulation(sim.mode);return;}
-      if(el.dataset.simDemo!==undefined){deadlockDemo();return;}
-
-      if(el.dataset.practiceNew!==undefined){practice=makePractice();route='practice';render();return;}
-      if(el.dataset.practiceChoice){practice.choice=el.dataset.practiceChoice;practice.feedback=null;render();return;}
-      if(el.dataset.practiceValueKey){practice.values[el.dataset.practiceValueKey]=el.dataset.value;practice.feedback=null;render();return;}
-      if(el.dataset.practiceSubmit!==undefined){checkPractice();return;}
-      if(el.dataset.practiceNext!==undefined){
-        if(practice.round===0){practice.round=1;practice.choice='';practice.feedback=null;}
-        else{practice=makePractice();}
-        render();return;
-      }
-      if(el.dataset.reviewClear!==undefined){save.mistakes=[];persist();render();return;}
     });
-
-    render();
+    createGame(0,"safe",false);
   </script>
 </body>
 </html>
