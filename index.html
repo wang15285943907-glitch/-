@@ -261,7 +261,7 @@
         <div class="map-head"><strong>山路关卡</strong><span>过关解锁</span></div>
         <div class="stage-list" id="stage-list"></div>
         <button class="stage-btn sandbox-btn" data-action="sandbox-open"><span class="stage-num">⚗</span><span class="stage-copy"><b>自由沙盘</b><small>自选容量、轮数与初始库存</small></span><span class="stage-check">↗</span></button>
-        <div class="map-note"><b>怎么游玩</b><br>点角色「执行一步」亲手调度；用「撤销一步」回退，用速度按钮控制自动轮转。自由沙盘可改容量、轮数和初始库存。<br><b>不考选择题，直接玩同步。</b></div>
+        <div class="map-note"><b>怎么游玩</b><br>先改上方代码里的 P / V 顺序，再点「编译并重开」；场景会按你写的程序运行。点角色逐步调度，观察资源等待与死锁；也可自动轮转、撤销或改代码重试。<br><b>写代码，直接看并发后果。</b></div>
       </aside>
       <section class="game">
         <header class="game-head">
@@ -956,7 +956,7 @@
     }
     function closeModal(){document.getElementById("modal-root").innerHTML="";}
     function openGuide(){
-      showModal("并发山谷 · 操作图鉴",'<h3>怎么控制进程</h3><ul><li>点角色卡片上的「执行一步」，你就是调度器；每次只执行一个 P、V 或临界区动作。</li><li>点「自动轮转」观察系统调度；速度按钮可切换慢速、标准和快速。</li><li>点「撤销一步」回到上一次操作前，重置会保留已解锁关卡。</li></ul><h3>本游戏中的规则</h3><ul><li><code>P(S)</code>：S 大于 0 时减 1 并继续；S 为 0 时进程进入等待队列。</li><li><code>V(S)</code>：唤醒等待队首；若无人等待，S 加 1。</li><li>互斥锁保护临界区；计数信号量表示可用资源数量。</li><li>死锁观察关会让你先亲手制造等待环，再通过改变资源申请顺序恢复运行。</li></ul><p class="modal-footnote">进度和修炼值保存在当前浏览器中。刷新页面不会丢关卡解锁。</p>');
+      showModal("并发山谷 · 操作图鉴",'<h3>写代码并运行</h3><ul><li>先改代码工坊里的进程程序，点「编译并重开」；编译后的 P / V 序列就是场景里真实执行的程序。</li><li>支持 P(S)、V(S)、buffer.put、buffer.get、read、write、modify、eat 和有限次数 for 循环。编译错误会标出代码行。</li><li>切换进程标签改另一位角色的代码；Ctrl / ⌘ + Enter 可编译。危险 / 安全模板只负责载入示例。</li></ul><h3>调度与同步规则</h3><ul><li>点场景角色或角色卡片「执行一步」，你就是调度器；每次只执行该进程代码中的下一行。</li><li>点「自动轮转」观察系统调度；速度按钮可切换慢速、标准和快速，撤销可以回到上一步。</li><li><code>P(S)</code>：S 大于 0 时减 1 并继续；S 为 0 时进程进入等待队列。</li><li><code>V(S)</code>：唤醒等待队首；若无人等待，S 加 1。错误的申请顺序会真实造成等待或死锁。</li></ul><p class="modal-footnote">本关是 C 风格同步代码子集，不是通用 C 编译器；进度和修炼值保存在当前浏览器中。</p>');
     }
     function openHint(){
       const queues=Object.keys(game.waiters).map(function(key){const list=game.waiters[key]||[];return list.length?semName(key)+"："+list.map(function(id){const actor=game.actors.find(function(item){return item.id===id;});return actor?actor.name.split(" · ")[0]:id;}).join("、"):"";}).filter(Boolean);
