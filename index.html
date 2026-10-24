@@ -253,6 +253,7 @@
       <div class="top-stats">
         <span class="stat-pill">修炼值 <b id="xp">0</b></span>
         <span class="stat-pill">山路进度 <b id="progress">1 / 7</b></span>
+        <button class="control-btn" data-action="sound" id="sound-btn" type="button" aria-pressed="true">🔊 音效开</button>
         <button class="control-btn" data-action="guide">⌘ 操作图鉴</button>
       </div>
     </header>
@@ -348,12 +349,16 @@
   <script>
     const STORE_KEY = "qinglan-concurrency-game-v2";
     const SANDBOX_KEY = STORE_KEY+"-sandbox";
+    const SOUND_KEY = STORE_KEY+"-sound";
     const CAMPAIGN_LEVELS = 7;
     const SANDBOX_INDEX = 7;
     const levelNames = ["竹林供需","满仓险路","批次行商","单格传信","互斥改写","共享阅览室","五侠争叉"];
     const levelShort = ["生产者与消费者","持锁等待","2014 批量取货变式","2024 单格同步变式","两个修改者","读者并行、写者独占","资源有序与死锁"];
     const save = loadSave();
     const sandboxSettings = loadSandboxSettings();
+    let soundEnabled=loadSoundPreference();
+    let soundContext=null;
+    let soundMaster=null;
     let currentLevel = 0;
     let game;
     let autoTimer = null;
@@ -408,6 +413,66 @@
     }
     function persistSandboxSettings(){
       try{localStorage.setItem(SANDBOX_KEY,JSON.stringify(sandboxSettings));}catch(e){}
+    }
+    function loadSoundPreference(){
+      try{return localStorage.getItem(SOUND_KEY)!=="off";}catch(e){return true;}
+    }
+    function persistSoundPreference(){
+      try{localStorage.setItem(SOUND_KEY,soundEnabled?"on":"off");}catch(e){}
+    }
+    function ensureSoundContext(){
+      if(!soundEnabled)return null;
+      const AudioContextCtor=window.AudioContext||window.webkitAudioContext;
+      if(!AudioContextCtor)return null;
+      try{
+        if(!soundContext||soundContext.state==="closed"){
+          soundContext=new AudioContextCtor();soundMaster=soundContext.createGain();soundMaster.gain.value=.34;soundMaster.connect(soundContext.destination);
+        }
+        if(soundContext.state==="suspended")soundContext.resume().catch(function(){});
+        return soundContext;
+      }catch(e){return null;}
+    }
+    function playSfx(name){
+      const ctx=ensureSoundContext();if(!ctx||!soundMaster)return;
+      const patterns={
+        on:[[660,0,.12,.045,"sine"],[880,.08,.18,.04,"sine"]],
+        compile:[[523,0,.11,.042,"triangle"],[659,.075,.13,.042,"triangle"],[784,.15,.19,.045,"sine"]],
+        start:[[440,0,.09,.035,"sine"],[587,.065,.13,.035,"sine"]],
+        pause:[[494,0,.1,.032,"sine"],[370,.08,.16,.028,"sine"]],
+        acquire:[[392,0,.07,.035,"triangle"],[587,.045,.11,.032,"sine"]],
+        token:[[494,0,.055,.028,"sine"],[659,.04,.08,.025,"sine"]],
+        release:[[587,0,.08,.03,"sine"],[784,.065,.13,.032,"sine"]],
+        wake:[[523,0,.08,.036,"triangle"],[698,.07,.1,.04,"sine"],[880,.15,.16,.038,"sine"]],
+        block:[[220,0,.14,.055,"triangle"],[165,.1,.21,.045,"triangle"]],
+        put:[[440,0,.08,.04,"triangle"],[659,.06,.14,.04,"sine"]],
+        get:[[659,0,.075,.035,"sine"],[440,.07,.14,.035,"triangle"]],
+        read:[[740,0,.085,.03,"sine"],[988,.07,.12,.027,"sine"]],
+        write:[[523,0,.08,.035,"triangle"],[784,.07,.15,.035,"sine"]],
+        modify:[[392,0,.09,.035,"triangle"],[523,.07,.1,.035,"triangle"],[659,.15,.16,.035,"sine"]],
+        eat:[[587,0,.1,.032,"sine"],[740,.08,.14,.032,"sine"]],
+        undo:[[587,0,.08,.03,"sine"],[392,.07,.12,.028,"triangle"]],
+        reset:[[392,0,.08,.028,"triangle"],[523,.075,.1,.03,"sine"]],
+        error:[[330,0,.13,.038,"triangle"],[247,.11,.21,.04,"triangle"]],
+        deadlock:[[392,0,.17,.04,"triangle"],[330,.13,.2,.042,"triangle"],[247,.28,.26,.045,"sawtooth"],[165,.48,.4,.04,"triangle"]],
+        win:[[523,0,.13,.04,"sine"],[659,.11,.14,.04,"sine"],[784,.22,.16,.04,"sine"],[1047,.34,.32,.042,"sine"]]
+      };
+      (patterns[name]||[]).forEach(function(note){
+        const osc=ctx.createOscillator(),gain=ctx.createGain(),start=ctx.currentTime+note[1],end=start+note[2];
+        osc.type=note[4];osc.frequency.setValueAtTime(note[0],start);
+        gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(note[3],start+.012);gain.gain.exponentialRampToValueAtTime(.0001,end);
+        osc.connect(gain);gain.connect(soundMaster);osc.start(start);osc.stop(end+.015);
+      });
+    }
+    function toggleSound(){
+      soundEnabled=!soundEnabled;persistSoundPreference();updateSoundButton();
+      if(soundEnabled){const ctx=ensureSoundContext();if(ctx&&soundMaster)soundMaster.gain.setTargetAtTime(.34,ctx.currentTime,.035);playSfx("on");}
+      else if(soundContext&&soundMaster)soundMaster.gain.setTargetAtTime(.0001,soundContext.currentTime,.025);
+    }
+    function updateSoundButton(){
+      const button=document.getElementById("sound-btn");if(!button)return;
+      const supported=Boolean(window.AudioContext||window.webkitAudioContext);
+      button.disabled=!supported;button.setAttribute("aria-pressed",String(soundEnabled));
+      button.textContent=supported?(soundEnabled?"🔊 音效开":"🔇 音效关"):"🔇 无音频支持";
     }
     function esc(value){
       return String(value).replace(/[&<>"']/g,function(c){
@@ -784,6 +849,7 @@
           if(!game.waiters[op.key].includes(actor.id))game.waiters[op.key].push(actor.id);
           addLog(actor.name+"执行 "+code+"：资源不足，进入等待队列。","warn",actor.name);
           game.lastLesson=explain(op,false,actor);
+          playSfx("block");
           checkDeadlock();
           render();
           return;
@@ -794,6 +860,7 @@
         addLog(actor.name+"执行 "+code+" 成功，"+semName(op.key)+" → "+game.sem[op.key]+"。","info",actor.name);
         game.lastLesson=explain(op,true,actor);
         flash(op.key,actor.id);
+        playSfx(isLockKey(op.key)?"acquire":"token");
       }else if(op.kind==="V"){
         actor.pc+=1;
         if(isLockKey(op.key))game.owners[op.key]=null;
@@ -802,29 +869,32 @@
         addLog(actor.name+"执行 "+code+"。"+(awakened?"唤醒 "+awakened+"。":semName(op.key)+" → "+game.sem[op.key]+"。"),"info",actor.name);
         game.lastLesson=explain(op,true,actor);
         flash(op.key,actor.id);
+        playSfx(awakened?"wake":"release");
       }else if(op.kind==="put"){
         if(game.buffer.length>=game.config.capacity){
           actor.status="blocked";actor.blockedOn="empty";
           game.waiters.empty.push(actor.id);
           addLog(actor.name+"到达货架时发现已满，等待 empty。","warn",actor.name);
           game.lastLesson="缓冲区满时不能继续放货。正常程序应在进入临界区之前 P(empty)。";
+          playSfx("block");
           checkDeadlock();render();return;
         }
         const label=game.config.goods[game.made%game.config.goods.length]||"📦";
         game.buffer.push({label:label});game.made+=1;actor.pc+=1;
         addLog(actor.name+"放入 "+label+"，缓冲区 "+game.buffer.length+" / "+game.config.capacity+"。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("put");
       }else if(op.kind==="get"){
         if(!game.buffer.length){
           actor.status="blocked";actor.blockedOn="full";
           game.waiters.full.push(actor.id);
           addLog(actor.name+"到达货架时没有货，等待 full。","warn",actor.name);
           game.lastLesson="消费者在没有产品时阻塞。等生产者放货并 V(full)，它才能继续。";
+          playSfx("block");
           checkDeadlock();render();return;
         }
         const item=game.buffer.shift();game.delivered+=1;actor.gets+=1;actor.pc+=1;
         addLog(actor.name+"取走 "+item.label+"，缓冲区腾出一个位置。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("get");
       }else if(op.kind==="write"){
         if(game.buffer.length){
           addLog(actor.name+"尝试写入，但单格数据舱不为空。","warn",actor.name);
@@ -833,32 +903,33 @@
         }
         game.buffer.push({label:"🗺️ 数据包"});game.made+=1;actor.pc+=1;
         addLog(actor.name+"写入一个数据包。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("write");
       }else if(op.kind==="read"){
         if(!game.buffer.length){
           actor.status="blocked";actor.blockedOn="dataReady";
           game.waiters.dataReady.push(actor.id);
           addLog(actor.name+"还没收到就绪信号，停在数据舱外。","warn",actor.name);
           game.lastLesson="读操作必须等写手执行 V(dataReady)。";
+          playSfx("block");
           render();return;
         }
         const item=game.buffer.shift();game.read+=1;actor.pc+=1;
         addLog(actor.name+"读取 "+item.label+"，同步关系完成。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("read");
       }else if(op.kind==="readShared"){
         game.read+=1;actor.pc+=1;
         addLog(actor.name+"开始并行阅览卷宗；数据没有被取走。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("read");
       }else if(op.kind==="eat"){
         game.eaten+=1;actor.pc+=1;
         addLog(actor.name+"拿齐两把玉叉，开始享用点心。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("eat");
       }else if(op.kind==="modify"){
         game.modified+=1;
         if(game.buffer.length)game.buffer[0].label=(currentLevel===5?"📚 卷宗 v":"🗺️ 地图 v")+(game.modified+1);
         actor.pc+=1;
         addLog(actor.name+"在临界区完成修改，当前版本 v"+(game.modified+1)+"。","good",actor.name);
-        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);playSfx("modify");
       }
       finishActor(actor);
       checkDeadlock();
@@ -878,6 +949,7 @@
       const allBlocked=active.length>0&&active.every(function(actor){return actor.status==="blocked";});
       if(!allBlocked)return;
       game.deadlock=true;
+      playSfx("deadlock");
       addLog("死锁形成：所有未完成进程都在等待，没人能释放它们需要的资源。","danger");
       if((currentLevel===1||currentLevel===6)&&!game.seenDeadlock){
         game.seenDeadlock=true;
@@ -909,6 +981,7 @@
       else done=game.delivered>=game.config.target&&game.buffer.length===0&&game.actors.every(function(actor){return actor.status==="done";});
       if(done&&!game.won){
         game.won=true;
+        playSfx("win");
         stopAuto();
         if(currentLevel<CAMPAIGN_LEVELS&&!save.cleared.includes(currentLevel)){
           save.cleared.push(currentLevel);
@@ -921,11 +994,13 @@
     }
     function resetCurrent(){
       const wasSeen=game.seenDeadlock;
+      playSfx("reset");
       createGame(currentLevel,game.mode,wasSeen);
     }
     function startAuto(){
-      if(game.auto){stopAuto();render();return;}
+      if(game.auto){playSfx("pause");stopAuto();render();return;}
       if(game.won)return;
+      playSfx("start");
       game.auto=true;render();
       autoTimer=setInterval(function(){
         if(!game||game.won){stopAuto();render();return;}
@@ -937,6 +1012,7 @@
       },autoDelays[autoSpeed]);
     }
     function undoStep(){
+      playSfx("undo");
       stopAuto();
       if(!undoStack.length){render();return;}
       game=undoStack.pop();
@@ -956,7 +1032,7 @@
     }
     function closeModal(){document.getElementById("modal-root").innerHTML="";}
     function openGuide(){
-      showModal("并发山谷 · 操作图鉴",'<h3>写代码并运行</h3><ul><li>先改代码工坊里的进程程序，点「编译并重开」；编译后的 P / V 序列就是场景里真实执行的程序。</li><li>支持 P(S)、V(S)、buffer.put、buffer.get、read、write、modify、eat 和有限次数 for 循环。编译错误会标出代码行。</li><li>切换进程标签改另一位角色的代码；Ctrl / ⌘ + Enter 可编译。危险 / 安全模板只负责载入示例。</li></ul><h3>调度与同步规则</h3><ul><li>点场景角色或角色卡片「执行一步」，你就是调度器；每次只执行该进程代码中的下一行。</li><li>点「自动轮转」观察系统调度；速度按钮可切换慢速、标准和快速，撤销可以回到上一步。</li><li><code>P(S)</code>：S 大于 0 时减 1 并继续；S 为 0 时进程进入等待队列。</li><li><code>V(S)</code>：唤醒等待队首；若无人等待，S 加 1。错误的申请顺序会真实造成等待或死锁。</li></ul><p class="modal-footnote">本关是 C 风格同步代码子集，不是通用 C 编译器；进度和修炼值保存在当前浏览器中。</p>');
+      showModal("并发山谷 · 操作图鉴",'<h3>写代码并运行</h3><ul><li>先改代码工坊里的进程程序，点「编译并重开」；编译后的 P / V 序列就是场景里真实执行的程序。</li><li>支持 P(S)、V(S)、buffer.put、buffer.get、read、write、modify、eat 和有限次数 for 循环。编译错误会标出代码行。</li><li>切换进程标签改另一位角色的代码；Ctrl / ⌘ + Enter 可编译。危险 / 安全模板只负责载入示例。</li></ul><h3>调度与同步规则</h3><ul><li>点场景角色或角色卡片「执行一步」，你就是调度器；每次只执行该进程代码中的下一行。</li><li>点「自动轮转」观察系统调度；速度按钮可切换慢速、标准和快速，撤销可以回到上一步。</li><li><code>P(S)</code>：S 大于 0 时减 1 并继续；S 为 0 时进程进入等待队列。</li><li><code>V(S)</code>：唤醒等待队首；若无人等待，S 加 1。错误的申请顺序会真实造成等待或死锁。</li></ul><h3>音效</h3><p>右上角「音效开 / 关」控制编译提示、资源申请、等待唤醒、死锁和通关音；首次点击游戏后浏览器会启用音频。</p><p class="modal-footnote">本关是 C 风格同步代码子集，不是通用 C 编译器；进度和修炼值保存在当前浏览器中。</p>');
     }
     function openHint(){
       const queues=Object.keys(game.waiters).map(function(key){const list=game.waiters[key]||[];return list.length?semName(key)+"："+list.map(function(id){const actor=game.actors.find(function(item){return item.id===id;});return actor?actor.name.split(" · ")[0]:id;}).join("、"):"";}).filter(Boolean);
@@ -1251,8 +1327,9 @@
         if(!parsed.ok)parsed.errors.forEach(function(issue){errors.push({actorId:actor.id,line:issue.line,text:issue.text});});
         else programs[actor.id]=Object.assign({source:source},parsed);
       });
-      if(errors.length){codeIssue=errors[0];selectedCodeActor=codeIssue.actorId;codeStatusText="编译失败";codeStatusType="error";renderCodeStudio();return;}
+      if(errors.length){codeIssue=errors[0];selectedCodeActor=codeIssue.actorId;codeStatusText="编译失败";codeStatusType="error";playSfx("error");renderCodeStudio();return;}
       const mode=inferProgramMode(currentLevel,programs,game.mode),seen=game.seenDeadlock;
+      playSfx("compile");
       createGame(currentLevel,mode,seen,programs);
       addLog("你的 P / V 程序已编译并载入；接下来由你调度它。","good");render();
     }
@@ -1324,6 +1401,7 @@
       document.getElementById("auto-btn").disabled=game.won;
       document.getElementById("speed-btn").textContent="速度 "+["0.5×","1×","1.8×"][autoSpeed];
       document.getElementById("undo-btn").disabled=!undoStack.length;
+      updateSoundButton();
       const next=document.getElementById("next-btn");
       next.hidden=!(game.won&&currentLevel<CAMPAIGN_LEVELS-1&&currentLevel+1<save.unlocked);
       renderMap();renderModeBar();renderGoal();renderBuffer();renderSemaphores();renderActors();renderCodeStudio();renderLogs();renderBanner();updateWorldHud();
@@ -1332,6 +1410,7 @@
       const button=event.target.closest("[data-action]");
       if(!button)return;
       const action=button.dataset.action;
+      if(action==="sound"){toggleSound();return;}
       if(action==="compile-code"){compileAndRun();return;}
       if(action==="code-actor"){
         selectedCodeActor=button.dataset.id;codeIssue=null;renderCodeStudio();return;
