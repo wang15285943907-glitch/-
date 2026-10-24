@@ -349,7 +349,8 @@
     function loadSandboxSettings(){
       try{
         const value=JSON.parse(localStorage.getItem(SANDBOX_KEY)||"{}");
-        return {capacity:Math.max(1,Math.min(6,Number(value.capacity)||3)),rounds:Math.max(1,Math.min(5,Number(value.rounds)||3)),initial:Number(value.initial)||0};
+        const capacity=Math.max(1,Math.min(6,Number(value.capacity)||3));
+        return {capacity:capacity,rounds:Math.max(1,Math.min(5,Number(value.rounds)||3)),initial:Math.max(0,Math.min(capacity,Number(value.initial)||0))};
       }catch(e){return {capacity:3,rounds:3,initial:0};}
     }
     function persistSandboxSettings(){
@@ -773,7 +774,7 @@
       autoTimer=setInterval(function(){
         if(!game||game.won){stopAuto();render();return;}
         const ready=game.actors.filter(function(actor){return actor.status==="ready";});
-        if(!ready.length){stopAuto();addLog("没有可运行的进程。检查等待队列或重开场景。","warn");render();return;}
+        if(!ready.length){stopAuto();if(!game.deadlock)addLog("没有可运行的进程。检查等待队列或重开场景。","warn");render();return;}
         const chosen=ready[autoCursor%ready.length];
         autoCursor+=1;
         stepActor(chosen.id,true);
@@ -852,7 +853,7 @@
       if(game.config.resourceView==="forks"){
         const keys=Object.keys(game.sem).filter(function(key){return /^fork\d+$/.test(key);});
         const labelByActor={};
-        game.actors.forEach(function(actor){labelByActor[actor.id]=actor.name.split(" ")[1]||actor.name;});
+        game.actors.forEach(function(actor){labelByActor[actor.id]=actor.id.replace("philosopher","")+"号侠客";});
         grid.innerHTML='<div class="fork-table">'+keys.map(function(key){
           const owner=game.owners[key];
           return '<div class="fork-token '+(owner?"held":"")+'">'+(owner?"✊":"🥢")+'<small>'+key.replace("fork","")+" 号"+(owner?" · "+esc(labelByActor[owner]||"占用"):" · 空闲")+'</small></div>';
@@ -877,7 +878,8 @@
         const ownerName=ownerActor?ownerActor.name:"空闲";
         const waiters=(game.waiters[key]||[]).map(function(id){const actor=game.actors.find(function(item){return item.id===id;});return actor?actor.name.split(" · ")[0]:id;});
         const meta=key==="readerSeats"?"已占用 <b>"+(game.config.sem[key]-game.sem[key])+"</b> 张席":"持有者 <b>"+esc(ownerName)+"</b>";
-        return '<div class="sem-card '+(lastSemFlash===key?"changed":"")+'"><div class="sem-top"><code>'+esc(key)+'</code><span>'+esc(labels[key]||semName(key))+'</span></div><div class="sem-value"><strong>'+game.sem[key]+'</strong><span>可用</span></div><div class="sem-meta"><span>'+meta+'</span><span>等待队列 <b>'+esc(waiters.length?waiters.join(" → "):"空")+'</b></span></div></div>';
+        const label=labels[key]||(/^fork\d+$/.test(key)?"圆桌玉叉":semName(key));
+        return '<div class="sem-card '+(lastSemFlash===key?"changed":"")+'"><div class="sem-top"><code>'+esc(key)+'</code><span>'+esc(label)+'</span></div><div class="sem-value"><strong>'+game.sem[key]+'</strong><span>可用</span></div><div class="sem-meta"><span>'+meta+'</span><span>等待队列 <b>'+esc(waiters.length?waiters.join(" → "):"空")+'</b></span></div></div>';
       }).join("");
     }
     function renderActors(){
