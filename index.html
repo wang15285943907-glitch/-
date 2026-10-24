@@ -843,7 +843,7 @@
       const cards=save.mistakes.map(function(item){
         return '<article class="mistake-card"><strong>'+escapeHTML(item.title)+'</strong><p>'+escapeHTML(item.principle)+'</p></article>';
       }).join('');
-      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>错题回看 · 把误区变成经验</p><h1>这些点再走一遍就稳了</h1><p>每条记录都保留了对应检查方向，不只记“选错了”。</p></div><button class="btn" data-review-clear>清空已掌握</button></div>' +
+      return '<div class="page-head"><div><p class="eyebrow"><span class="eyebrow-mark"></span>错题回看 · 把误区变成经验</p><h1>这些点再走一遍就稳了</h1><p>每条记录都保留了对应检查方向，不只记“选错了”。</p></div><button class="btn" data-review-clear>清空错题记录</button></div>' +
         '<div class="review-grid">'+cards+'</div><div class="end-row"><button class="btn btn-main" data-route="practice">去随机试炼 →</button></div>';
     }
 
@@ -886,7 +886,7 @@
     document.addEventListener('click',function(event){
       const el=event.target.closest('button,a[data-route]');
       if(!el)return;
-      if(el.dataset.route){route=el.dataset.route;render();return;}
+      if(el.dataset.route){if(el.tagName==='A')event.preventDefault();route=el.dataset.route;render();return;}
       if(el.dataset.mainStage!==undefined){
         main.step=Number(el.dataset.mainStage);resetMain();route='story';render();return;
       }
