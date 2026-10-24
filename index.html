@@ -29,7 +29,7 @@
     .brand-stamp{display:grid;place-items:center;width:43px;height:43px;border:1px solid rgba(151,220,190,.38);border-radius:15px;background:linear-gradient(145deg,rgba(132,218,175,.19),rgba(42,108,127,.23));color:#c1f0d8;font-weight:900;box-shadow:0 10px 28px #0006,inset 0 1px #fff2}
     .brand strong{display:block;font-size:14px;letter-spacing:.04em}
     .brand small{display:block;color:#83a69b;font-size:9px;letter-spacing:.2em}
-    .top-stats{display:flex;align-items:center;gap:8px}
+    .top-stats{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .stat-pill{display:flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#06191dbb;color:#a9c4b8;font-size:10px}
     .stat-pill b{color:#eaf5eb;font-size:12px}
     .layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:15px;align-items:start}
@@ -48,6 +48,9 @@
     .stage-copy b{display:block;overflow:hidden;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
     .stage-copy small{display:block;margin-top:2px;color:#78968c;font-size:9px}
     .stage-check{margin-left:auto;color:var(--good);font-size:12px}
+    .stage-btn.sandbox-btn{margin-top:8px;border-color:rgba(234,194,124,.19);background:linear-gradient(120deg,rgba(126,97,48,.12),rgba(31,89,101,.14));color:#e5d2a9}
+    .stage-btn.sandbox-btn .stage-num{border-color:#eac27c44;background:#eac27c14;color:#f0d599}
+    .stage-btn.sandbox-btn:hover{border-color:#eac27c55}
     .map-note{margin-top:13px;padding:12px;border:1px solid rgba(124,191,183,.13);border-radius:13px;background:rgba(5,27,34,.45);color:#8eaaa1;font-size:9px;line-height:1.8}
     .map-note b{color:#bedacb}
     .game{min-width:0}
@@ -87,7 +90,11 @@
     .sem-value{display:flex;align-items:baseline;gap:6px;margin-top:1px}
     .sem-value strong{color:#f0f7ee;font:800 22px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace}
     .sem-value span{color:#74948a;font-size:8px}
+    .sem-meta{display:grid;gap:2px;margin-top:5px;padding-top:5px;border-top:1px solid #ffffff0b;color:#78968c;font-size:8px;line-height:1.5}
+    .sem-meta b{color:#b5d9c5;font-weight:700}
     .actor-list{display:grid;gap:8px}
+    .actor-list.philosopher-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .actor-list.philosopher-list .actor-card:last-child{grid-column:1/-1}
     .actor-card{position:relative;padding:10px 12px 9px;border:1px solid rgba(173,217,194,.15);border-radius:15px;background:linear-gradient(125deg,rgba(6,25,30,.73),rgba(9,38,44,.77));box-shadow:0 10px 20px #0002,inset 0 1px #fff09;transition:border-color .2s,background .2s}
     .actor-card.active{border-color:rgba(121,210,178,.43);background:linear-gradient(125deg,rgba(20,66,57,.86),rgba(10,47,54,.84))}
     .actor-card.blocked{border-color:rgba(243,155,146,.42);background:linear-gradient(125deg,rgba(87,43,44,.35),rgba(22,37,42,.81))}
@@ -122,6 +129,8 @@
     .control-btn.primary{border-color:rgba(190,230,190,.28);background:linear-gradient(115deg,#79c99f,#a4d9b0);color:#0d2c29;box-shadow:0 6px 18px #4b9b722b}
     .control-btn.primary:hover{background:linear-gradient(115deg,#91d9b1,#c0e6bd)}
     .control-btn.active{border-color:rgba(240,190,125,.4);background:rgba(142,103,48,.18);color:#f3d39d}
+    .control-btn:disabled{cursor:not-allowed;opacity:.38}
+    .speed-btn{min-width:88px;font-variant-numeric:tabular-nums}
     .mode-bar{display:flex;gap:7px;margin-bottom:11px}
     .scene-bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,.62fr);gap:10px;margin-top:12px}
     .subpanel{padding:12px 13px;border:1px solid rgba(172,218,195,.14);border-radius:15px;background:rgba(4,22,28,.58)}
@@ -135,21 +144,38 @@
     .journal{color:#9ab5a9;font-size:9px;line-height:1.8}
     .journal b{color:#cde3d4}
     .tip-chip{display:inline-block;margin:6px 4px 0 0;padding:4px 7px;border:1px solid rgba(130,194,191,.18);border-radius:99px;background:rgba(31,86,98,.17);color:#a7d2d0;font-size:8px}
+    .fork-table{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:center;min-height:102px;padding:12px;border-radius:14px;background:radial-gradient(ellipse at center,rgba(104,143,103,.28),rgba(5,22,28,.35) 62%)}
+    .fork-token{display:grid;place-items:center;gap:2px;min-height:66px;border:1px solid #a7d7bf35;border-radius:13px;background:linear-gradient(145deg,#173d36cc,#123340cc);color:#d8ebdc;font-size:18px;box-shadow:0 8px 18px #0004,inset 0 1px #fff2;transition:.25s ease}
+    .fork-token small{color:#8dac9e;font-size:8px}
+    .fork-token.held{border-color:#f2ae866e;background:linear-gradient(145deg,#704535aa,#3e3542cc);box-shadow:0 0 18px #ed9c6840,inset 0 1px #fff2;transform:translateY(-3px)}
+    .fork-token.held small{color:#ffd2ae}
     .deadlock-banner,.win-banner{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;border:1px solid rgba(241,154,145,.35);border-radius:12px;background:linear-gradient(100deg,rgba(126,55,55,.27),rgba(37,39,44,.44));color:#f0c1b6;font-size:9px;line-height:1.7;animation:arrive .3s ease}
     .win-banner{border-color:rgba(143,224,176,.33);background:linear-gradient(100deg,rgba(51,117,81,.25),rgba(26,62,67,.43));color:#c5e9d0}
     .banner-icon{font-size:19px}
     @keyframes arrive{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
     .locked-overlay{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(3,14,18,.65);backdrop-filter:blur(8px)}
-    .modal-card{width:min(450px,100%);padding:26px;border:1px solid rgba(178,221,195,.28);border-radius:24px;background:linear-gradient(145deg,#123a36,#0c2a34);box-shadow:0 30px 90px #0009;text-align:center;animation:arrive .3s ease}
+    .modal-card{position:relative;width:min(520px,100%);padding:26px;border:1px solid rgba(178,221,195,.28);border-radius:24px;background:linear-gradient(145deg,#123a36,#0c2a34);box-shadow:0 30px 90px #0009;text-align:left;animation:arrive .3s ease}
+    .modal-card{max-height:calc(100vh - 40px);overflow:auto}
     .modal-mark{display:grid;place-items:center;width:57px;height:57px;margin:0 auto 15px;border:1px solid rgba(234,194,124,.34);border-radius:19px;background:rgba(234,194,124,.12);color:var(--gold);font-size:25px}
-    .modal-card h2{margin:0 0 8px;font-size:22px}
-    .modal-card p{margin:0 auto 18px;max-width:340px;color:#a9c3b6;font-size:11px;line-height:1.8}
+    .modal-card h2{margin:0 0 8px;font-size:22px;text-align:center}
+    .modal-card p{margin:0 auto 18px;max-width:460px;color:#a9c3b6;font-size:11px;line-height:1.8}
     .modal-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+    .modal-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border:1px solid #ffffff18;border-radius:10px;background:#06191d88;color:#b9cec0;cursor:pointer}
+    .modal-body{color:#a9c3b6;font-size:11px;line-height:1.85}
+    .modal-body h3{margin:15px 0 5px;color:#d4e8da;font-size:12px}
+    .modal-body ul{margin:5px 0;padding-left:18px}
+    .modal-body li{margin:3px 0}
+    .modal-body code{padding:2px 5px;border-radius:5px;background:#06191d;color:#b9efd2;font-size:10px}
+    .sandbox-form{display:grid;gap:12px;margin:15px 0}
+    .sandbox-field{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:10px 12px;border:1px solid #ffffff16;border-radius:12px;background:#06191d66;color:#c3d9cb;font-size:10px}
+    .sandbox-field select{min-width:104px;padding:7px 9px;border:1px solid #b2d6bd2b;border-radius:8px;background:#0a282c;color:#e4f2e8;font:inherit}
+    .modal-footnote{color:#77958a;font-size:9px;line-height:1.6}
+    .inspector-note{margin-top:8px;color:#78968c;font-size:8px;line-height:1.6}
     .footer-note{margin:14px 0 0;color:#6e8b81;font-size:8px;text-align:center}
     @media(max-width:980px){
       .layout{grid-template-columns:1fr}
       .map-panel{position:static}
-      .stage-list{grid-template-columns:repeat(5,minmax(0,1fr))}
+      .stage-list{grid-template-columns:repeat(4,minmax(0,1fr))}
       .stage-btn{align-items:flex-start;flex-direction:column;gap:6px;min-height:83px}
       .stage-check{margin-left:0}
       .map-note{display:none}
@@ -163,6 +189,10 @@
       .map-panel{padding:10px}
       .stage-list{display:flex;overflow:auto;padding-bottom:3px}
       .stage-btn{flex:0 0 128px;min-height:72px;padding:8px}
+      .actor-list.philosopher-list{grid-template-columns:1fr}
+      .actor-list.philosopher-list .actor-card:last-child{grid-column:auto}
+      .fork-table{gap:4px;padding:7px}
+      .fork-token{min-height:58px;font-size:15px}
       .stage-copy b{font-size:10px}
       .game-head{align-items:flex-start}
       .game-subtitle{max-width:390px}
@@ -193,14 +223,16 @@
       </div>
       <div class="top-stats">
         <span class="stat-pill">修炼值 <b id="xp">0</b></span>
-        <span class="stat-pill">山路进度 <b id="progress">1 / 5</b></span>
+        <span class="stat-pill">山路进度 <b id="progress">1 / 7</b></span>
+        <button class="control-btn" data-action="guide">⌘ 操作图鉴</button>
       </div>
     </header>
     <main class="layout">
       <aside class="panel map-panel">
         <div class="map-head"><strong>山路关卡</strong><span>过关解锁</span></div>
         <div class="stage-list" id="stage-list"></div>
-        <div class="map-note"><b>怎么游玩</b><br>点每个角色的「执行一步」，亲手安排并发顺序。货物、信号量、锁和等待状态都会随操作即时变化。<br><b>不考选择题，直接玩同步。</b></div>
+        <button class="stage-btn sandbox-btn" data-action="sandbox-open"><span class="stage-num">⚗</span><span class="stage-copy"><b>自由沙盘</b><small>自选容量、轮数与初始库存</small></span><span class="stage-check">↗</span></button>
+        <div class="map-note"><b>怎么游玩</b><br>点角色「执行一步」亲手调度；用「撤销一步」回退，用速度按钮控制自动轮转。自由沙盘可改容量、轮数和初始库存。<br><b>不考选择题，直接玩同步。</b></div>
       </aside>
       <section class="game">
         <header class="game-head">
@@ -235,8 +267,8 @@
               <div class="objective-progress"><span id="goal-count">0 / 3</span><span class="progress-track"><span class="progress-fill" id="goal-fill" style="width:0%"></span></span></div>
             </div>
             <div id="mode-bar" class="mode-bar"></div>
-            <div class="buffer-deck">
-              <div class="deck-head"><strong>共享资源 · 缓冲区</strong><span id="buffer-count">0 / 2 件</span></div>
+            <div class="buffer-deck" id="buffer-deck">
+              <div class="deck-head"><strong id="resource-title">共享资源 · 缓冲区</strong><span id="buffer-count">0 / 2 件</span></div>
               <div class="buffer-grid" id="buffer-grid"></div>
             </div>
             <div class="semaphore-row" id="semaphore-row"></div>
@@ -244,10 +276,12 @@
             <div class="scene-controls">
               <div class="control-group">
                 <button class="control-btn primary" data-action="auto" id="auto-btn">▶ 自动轮转</button>
-                <button class="control-btn" data-action="reset">↺ 重置本关</button>
+                <button class="control-btn speed-btn" data-action="speed" id="speed-btn">速度 1×</button>
+                <button class="control-btn" data-action="undo" id="undo-btn" disabled>↶ 撤销一步</button>
               </div>
               <div class="control-group">
-                <button class="control-btn" data-action="hint">⌘ 看本关口诀</button>
+                <button class="control-btn" data-action="reset">↺ 重置本关</button>
+                <button class="control-btn" data-action="hint">⌘ 本关讲解</button>
                 <button class="control-btn" data-action="next" id="next-btn" hidden>登上下一段 →</button>
               </div>
             </div>
@@ -272,23 +306,33 @@
   <div id="modal-root"></div>
   <script>
     const STORE_KEY = "qinglan-concurrency-game-v2";
-    const levelNames = ["竹林供需","满仓险路","批次行商","单格传信","互斥改写"];
-    const levelShort = ["生产者与消费者","持锁等待","2014 批量取货变式","2024 单格同步变式","两个修改者"];
+    const SANDBOX_KEY = STORE_KEY+"-sandbox";
+    const CAMPAIGN_LEVELS = 7;
+    const SANDBOX_INDEX = 7;
+    const levelNames = ["竹林供需","满仓险路","批次行商","单格传信","互斥改写","共享阅览室","五侠争叉"];
+    const levelShort = ["生产者与消费者","持锁等待","2014 批量取货变式","2024 单格同步变式","两个修改者","读者并行、写者独占","资源有序与死锁"];
     const save = loadSave();
+    const sandboxSettings = loadSandboxSettings();
     let currentLevel = 0;
     let game;
     let autoTimer = null;
     let autoCursor = 0;
+    let autoSpeed = 1;
+    const autoDelays = [1050,680,380];
+    let undoStack = [];
     let lastFlash = "";
     let lastSemFlash = "";
 
     function loadSave(){
       try{
         const value = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+        const cleared = Array.isArray(value.cleared) ? value.cleared.filter(function(index){return Number.isInteger(index)&&index>=0&&index<CAMPAIGN_LEVELS;}) : [];
+        let unlocked = Math.max(1, Math.min(CAMPAIGN_LEVELS, Number(value.unlocked) || 1));
+        if(cleared.includes(4))unlocked=Math.max(unlocked,6);
         return {
           xp: Number(value.xp) || 0,
-          unlocked: Math.max(1, Math.min(5, Number(value.unlocked) || 1)),
-          cleared: Array.isArray(value.cleared) ? value.cleared : [],
+          unlocked: unlocked,
+          cleared: cleared,
           deadlockBonus: Boolean(value.deadlockBonus)
         };
       }catch(e){
@@ -300,7 +344,16 @@
       const xp = document.getElementById("xp");
       const progress = document.getElementById("progress");
       if(xp) xp.textContent = save.xp;
-      if(progress) progress.textContent = save.unlocked + " / 5";
+      if(progress) progress.textContent = save.unlocked + " / " + CAMPAIGN_LEVELS;
+    }
+    function loadSandboxSettings(){
+      try{
+        const value=JSON.parse(localStorage.getItem(SANDBOX_KEY)||"{}");
+        return {capacity:Math.max(1,Math.min(6,Number(value.capacity)||3)),rounds:Math.max(1,Math.min(5,Number(value.rounds)||3)),initial:Number(value.initial)||0};
+      }catch(e){return {capacity:3,rounds:3,initial:0};}
+    }
+    function persistSandboxSettings(){
+      try{localStorage.setItem(SANDBOX_KEY,JSON.stringify(sandboxSettings));}catch(e){}
     }
     function esc(value){
       return String(value).replace(/[&<>"']/g,function(c){
@@ -329,6 +382,13 @@
       for(let i=0;i<3;i++) ops.push(P("full"),P("bufferLock"),A("get"),V("bufferLock"),V("empty"));
       ops.push(V("batchLock"));
       return ops;
+    }
+    function readerOps(){return [P("readerSeats"),A("readShared"),V("readerSeats")];}
+    function philosopherOps(index,mode){
+      const left=index+1,right=(index+1)%5+1;
+      const first=mode==="safe"?Math.min(left,right):left;
+      const second=mode==="safe"?Math.max(left,right):right;
+      return [P("fork"+first),P("fork"+second),A("eat"),V("fork"+second),V("fork"+first)];
     }
     function levelConfig(index,mode){
       if(index===0){
@@ -387,7 +447,7 @@
           lesson:"这道 2024 年题型原型改写成单格数据舱。一次写、一次读时，P(dataReady) / V(dataReady) 已经保证写先于读，不必额外加 mutex；后面的关卡会单独模拟多个修改者需要互斥。"
         };
       }
-      return {
+      if(index===4)return {
         title:"互斥改写",tag:"2024 真题考点改编 · 临界区",
         desc:"数据舱已有一张地图，两位修订者都要修改它。交错安排他们的操作，观察 mutex 如何保证同一时刻只有一人改图。",
         objective:"让甲、乙都完成一次修改",hint:"数据已经存在；此处要防并发修改，不需要“等数据”的同步量。",
@@ -399,17 +459,64 @@
         ],
         lesson:"互斥解决的是“不能同时改同一份共享数据”。初始已有数据，因此不用 full 等待；两个修改者各自 P(mutex) 进入临界区，V(mutex) 后让另一方继续。"
       };
+      if(index===5){
+        return {
+          title:"共享阅览室",tag:"进阶同步 · 多读者 / 单写者",
+          desc:"两位读者可以同时看卷宗，修订者必须等两张阅览席都空出来才能改。安排进程，亲眼看见共享读取与独占写入如何共存。",
+          objective:"两位读者都读完，修订者再提交一次修改",hint:"每位读者占一张席；写者要一次申请两张席。",
+          capacity:1,initial:["📚 共享卷宗"],goods:["📚"],resourceTitle:"共享资源 · 阅览席与卷宗",
+          sem:{readerSeats:2},
+          actors:[
+            {id:"readerA",name:"甲读者 · 只读",icon:"🦉",loop:false,ops:readerOps()},
+            {id:"readerB",name:"乙读者 · 只读",icon:"🕊️",loop:false,ops:readerOps()},
+            {id:"writer",name:"修订者 · 独占写",icon:"🖋️",loop:false,ops:[P("readerSeats"),P("readerSeats"),A("modify"),V("readerSeats"),V("readerSeats")]}
+          ],
+          lesson:"两张 readerSeats 代表可并行阅读的席位。每位读者持有一张席位完成读取；写者必须连续取得两张席位，才能独占卷宗。写者若只拿到一张就等待，已有读者仍能释放席位，因此不会永久卡住。"
+        };
+      }
+      if(index===6){
+        const forks={};
+        for(let i=1;i<=5;i++)forks["fork"+i]=1;
+        const icons=["🦊","🐼","🦝","🐻","🐨"];
+        return {
+          title:"五侠争叉",tag:"进阶同步 · 环形资源与死锁",
+          desc:"五位侠客围桌而坐，每人要同时拿到左右两把玉叉才能吃饭。先试试人人都先拿左手边，再重开并按资源编号有序取叉。",
+          objective:"先观察环形等待，再让五位侠客安全吃到点心",hint:"破坏循环等待：所有进程按同一个资源编号顺序申请。",
+          capacity:5,initial:[],goods:[],resourceTitle:"共享资源 · 五把玉叉",resourceView:"forks",sem:forks,
+          actors:icons.map(function(icon,index){return {id:"philosopher"+index,name:"第 "+(index+1)+" 位侠客",icon:icon,loop:false,ops:philosopherOps(index,mode)};}),
+          lesson:"危险方案让每位侠客先拿左叉，再等右叉。五把叉都被占住后形成环形等待。安全方案按叉号从小到大申请；最后一位也先拿 1 号再拿 5 号，资源顺序不会绕成环。"
+        };
+      }
+      if(index===SANDBOX_INDEX){
+        const capacity=sandboxSettings.capacity,rounds=sandboxSettings.rounds,initial=Math.min(sandboxSettings.initial,capacity);
+        const goods=["🍑","🍐","🌰","🫐","🍊","🍎"];
+        const start=Array.from({length:initial},function(_,i){return "试验货物 "+(i+1);});
+        return {
+          title:"自由沙盘",tag:"自由实验 · 自选并发参数",
+          desc:"当前设置：容量 "+capacity+" 格、生产 "+rounds+" 轮、初始库存 "+initial+" 件。手动调度每个 P/V，也可以切换危险顺序观察阻塞。",
+          objective:"处理完全部 "+(rounds+initial)+" 件货物",hint:"用撤销回退一步；换调度顺序再观察等待队列。",
+          capacity:capacity,initial:start,goods:goods,resourceTitle:"共享资源 · 可调缓冲区",target:rounds+initial,
+          sem:{empty:capacity-initial,full:initial,mutex:1},
+          actors:[
+            {id:"producer",name:"采集者 · 生产者",icon:"🧑‍🌾",loop:false,ops:producerOps(rounds,mode)},
+            {id:"consumer",name:"搬运者 · 消费者",icon:"🦦",loop:false,ops:consumerOps(rounds+initial)}
+          ],
+          lesson:"缓冲区有 "+capacity+" 格，开始时放了 "+initial+" 件，生产者还会补 "+rounds+" 件。empty 表示空位，full 表示货物，mutex 保护共享缓冲区。改变初始库存和申请顺序，可以亲手制造等待或死锁。"
+        };
+      }
     }
     function createGame(index,mode,preserveDeadlock){
       stopAuto();
       currentLevel=index;
-      const config=levelConfig(index,mode || (index===1?"danger":"safe"));
+      undoStack=[];autoCursor=0;
+      const defaultMode=(index===1||index===6)?"danger":"safe";
+      const config=levelConfig(index,mode || defaultMode);
       game={
-        config:config,mode:mode || (index===1?"danger":"safe"),
+        config:config,mode:mode || defaultMode,
         sem:Object.assign({},config.sem),
         buffer:config.initial.map(function(item){return {label:item};}),
         actors:config.actors.map(function(spec){return Object.assign({},spec,{pc:0,status:"ready",blockedOn:"",place:0,gets:0});}),
-        waiters:{},owners:{},logs:[],made:0,delivered:0,read:0,modified:0,batches:0,
+        waiters:{},owners:{},logs:[],made:0,delivered:0,read:0,modified:0,batches:0,eaten:0,
         seenDeadlock:Boolean(preserveDeadlock),deadlock:false,won:false,auto:false,
         lastLesson:"",settledDeliveries:0
       };
@@ -419,6 +526,9 @@
       if(index===2) addLog("三件一批。先让甲、乙都尝试申请 batchLock，再调度持锁者连续取货。","info");
       if(index===3) addLog("读手先等 dataReady；写手写完并 V(dataReady) 后，读手才能继续。","info");
       if(index===4) addLog("两位修订者面对同一份地图。交错点按，观察 mutex 队列。","info");
+      if(index===5) addLog("两位读者可以各占一张阅览席；修订者需要两张席才能进入写区。","info");
+      if(index===6) addLog(mode==="safe"?"安全次序：每位侠客按叉号从小到大申请。":"危险次序：每位侠客先拿左叉，再等右叉。","warn");
+      if(index===SANDBOX_INDEX) addLog("沙盘已按你的参数生成。可以撤销任意一步，也能重置后更换调度顺序。","info");
       render();
     }
     function stopAuto(){
@@ -430,23 +540,27 @@
       game.logs=game.logs.slice(0,12);
     }
     function semName(key){
-      return {empty:"empty 空位",full:"full 产品",mutex:"mutex 互斥",bufferLock:"bufferLock 单次存取",batchLock:"batchLock 整批资格",dataReady:"dataReady 数据就绪"}[key]||key;
+      if(/^fork\d+$/.test(key))return key+" 玉叉";
+      return {empty:"empty 空位",full:"full 产品",mutex:"mutex 互斥",bufferLock:"bufferLock 单次存取",batchLock:"batchLock 整批资格",dataReady:"dataReady 数据就绪",readerSeats:"readerSeats 阅览席"}[key]||key;
     }
+    function isLockKey(key){return key==="mutex"||key==="bufferLock"||key==="batchLock"||/^fork\d+$/.test(key);}
     function opCode(op){
       if(op.kind==="P"||op.kind==="V")return op.kind+"("+op.key+")";
-      return {put:"放入货物",get:"取出货物",write:"写入数据",read:"读取数据",modify:"修改数据"}[op.kind]||op.kind;
+      return {put:"放入货物",get:"取出货物",write:"写入数据",read:"读取数据",readShared:"并行阅览",modify:"修改数据",eat:"享用点心"}[op.kind]||op.kind;
     }
     function opPlace(op){
-      if(op.kind==="P")return op.key==="mutex"||op.key==="bufferLock"?47:27;
-      if(op.kind==="V")return op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock"?75:95;
+      if(op.kind==="P")return isLockKey(op.key)?47:27;
+      if(op.kind==="V")return isLockKey(op.key)?75:95;
       return 60;
     }
     function explain(op,success,actor){
       if(op.kind==="P"&&!success)return semName(op.key)+"不足，"+actor.name+"阻塞在资源门口，后面的操作不会执行。";
-      if(op.kind==="P")return op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock"
+      if(op.kind==="P"&&op.key==="readerSeats")return "阅览席数量减 1。读者拿一张即可阅读，写者要拿满两张才可独占卷宗。";
+      if(op.kind==="V"&&op.key==="readerSeats")return actor.name+"归还一张阅览席；等待中的进程可以继续申请。";
+      if(op.kind==="P")return isLockKey(op.key)
         ? "信号量减 1，"+actor.name+"拿到"+semName(op.key)+"，进入受保护区域。"
         : "信号量减 1，"+actor.name+"确认资源可用，继续往山门走。";
-      if(op.kind==="V")return op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock"
+      if(op.kind==="V")return isLockKey(op.key)
         ? actor.name+"释放"+semName(op.key)+"；若有人等待，会直接唤醒队首。"
         : actor.name+"发出"+semName(op.key)+"通知，等待进程可以继续。";
       return {
@@ -454,6 +568,8 @@
         get:"货物离开共享缓冲区，消费者腾出了一个空位。",
         write:"数据包写入唯一的数据舱。",
         read:"读手取走数据包，单次同步任务完成。",
+        readShared:"卷宗保持原样。多个读者可以同时持有阅览席，只读不争抢写锁。",
+        eat:"侠客同时拿到了左右两把玉叉，开始享用点心。",
         modify:"修改已提交。互斥锁保护这次对共享数据的更新。"
       }[op.kind]||"一次共享操作完成。";
     }
@@ -476,7 +592,7 @@
       const actor=game.actors.find(function(item){return item.id===id;});
       if(actor){
         actor.status="ready";actor.blockedOn="";actor.pc+=1;actor.place=opPlace(actor.ops[actor.pc]||{kind:"put"});
-        if(key==="mutex"||key==="bufferLock"||key==="batchLock")game.owners[key]=id;
+        if(isLockKey(key))game.owners[key]=id;
         return actor.name;
       }
       return "";
@@ -498,6 +614,8 @@
       const actor=game.actors.find(function(item){return item.id===id;});
       if(!actor||actor.status!=="ready")return;
       if(game.auto&&!fromAuto)stopAuto();
+      undoStack.push(JSON.parse(JSON.stringify(game)));
+      if(undoStack.length>80)undoStack.shift();
       const op=nextOp(actor);
       if(!op)return;
       const code=opCode(op);
@@ -514,16 +632,16 @@
           return;
         }
         game.sem[op.key]-=1;
-        if(op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock")game.owners[op.key]=actor.id;
+        if(isLockKey(op.key))game.owners[op.key]=actor.id;
         actor.pc+=1;
         addLog(actor.name+"执行 "+code+" 成功，"+semName(op.key)+" → "+game.sem[op.key]+"。","info",actor.name);
         game.lastLesson=explain(op,true,actor);
         flash(op.key,actor.id);
       }else if(op.kind==="V"){
         actor.pc+=1;
-        if(op.key==="mutex"||op.key==="bufferLock"||op.key==="batchLock")game.owners[op.key]=null;
+        if(isLockKey(op.key))game.owners[op.key]=null;
         const awakened=wakeOne(op.key,actor.id);
-        if(op.key==="empty"&&(currentLevel===0||currentLevel===1)&&actor.id==="consumer")game.settledDeliveries+=1;
+        if(op.key==="empty"&&(currentLevel===0||currentLevel===1||currentLevel===SANDBOX_INDEX)&&actor.id==="consumer")game.settledDeliveries+=1;
         addLog(actor.name+"执行 "+code+"。"+(awakened?"唤醒 "+awakened+"。":semName(op.key)+" → "+game.sem[op.key]+"。"),"info",actor.name);
         game.lastLesson=explain(op,true,actor);
         flash(op.key,actor.id);
@@ -570,9 +688,17 @@
         const item=game.buffer.shift();game.read+=1;actor.pc+=1;
         addLog(actor.name+"读取 "+item.label+"，同步关系完成。","good",actor.name);
         game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }else if(op.kind==="readShared"){
+        game.read+=1;actor.pc+=1;
+        addLog(actor.name+"开始并行阅览卷宗；数据没有被取走。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
+      }else if(op.kind==="eat"){
+        game.eaten+=1;actor.pc+=1;
+        addLog(actor.name+"拿齐两把玉叉，开始享用点心。","good",actor.name);
+        game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
       }else if(op.kind==="modify"){
         game.modified+=1;
-        if(game.buffer.length)game.buffer[0].label="🗺️ 地图 v"+(game.modified+1);
+        if(game.buffer.length)game.buffer[0].label=(currentLevel===5?"📚 卷宗 v":"🗺️ 地图 v")+(game.modified+1);
         actor.pc+=1;
         addLog(actor.name+"在临界区完成修改，当前版本 v"+(game.modified+1)+"。","good",actor.name);
         game.lastLesson=explain(op,true,actor);flash("buffer",actor.id);
@@ -596,7 +722,7 @@
       if(!allBlocked)return;
       game.deadlock=true;
       addLog("死锁形成：所有未完成进程都在等待，没人能释放它们需要的资源。","danger");
-      if(currentLevel===1&&!game.seenDeadlock){
+      if((currentLevel===1||currentLevel===6)&&!game.seenDeadlock){
         game.seenDeadlock=true;
         if(!save.deadlockBonus){save.deadlockBonus=true;save.xp+=8;persist();}
       }
@@ -609,7 +735,10 @@
       }
       if(currentLevel===2)return {n:Math.min(game.batches,2),total:2};
       if(currentLevel===3)return {n:Math.min(game.read,1),total:1};
-      return {n:Math.min(game.modified,2),total:2};
+      if(currentLevel===4)return {n:Math.min(game.modified,2),total:2};
+      if(currentLevel===5)return {n:Math.min(game.read,2)+Math.min(game.modified,1),total:3,label:"阅读 "+Math.min(game.read,2)+" / 2 · 修改 "+Math.min(game.modified,1)+" / 1"};
+      if(currentLevel===6)return {n:(game.seenDeadlock?1:0)+Math.min(game.eaten,5),total:6,label:game.seenDeadlock?"死锁已观察 · 安全享用 "+Math.min(game.eaten,5)+" / 5":"步骤 1 / 6 · 观察环形等待"};
+      return {n:Math.min(game.delivered,game.config.target),total:game.config.target};
     }
     function checkGoal(){
       let done=false;
@@ -617,13 +746,17 @@
       else if(currentLevel===1)done=game.seenDeadlock&&game.mode==="safe"&&game.settledDeliveries>=1&&game.actors.every(function(actor){return actor.status==="done";});
       else if(currentLevel===2)done=game.batches>=2&&game.actors.every(function(actor){return actor.status==="done";});
       else if(currentLevel===3)done=game.read>=1;
-      else done=game.modified>=2&&game.actors.every(function(actor){return actor.status==="done";});
+      else if(currentLevel===4)done=game.modified>=2&&game.actors.every(function(actor){return actor.status==="done";});
+      else if(currentLevel===5)done=game.read>=2&&game.modified>=1&&game.actors.every(function(actor){return actor.status==="done";});
+      else if(currentLevel===6)done=game.seenDeadlock&&game.mode==="safe"&&game.eaten>=5&&game.actors.every(function(actor){return actor.status==="done";});
+      else done=game.delivered>=game.config.target&&game.buffer.length===0&&game.actors.every(function(actor){return actor.status==="done";});
       if(done&&!game.won){
         game.won=true;
-        if(!save.cleared.includes(currentLevel)){
+        stopAuto();
+        if(currentLevel<CAMPAIGN_LEVELS&&!save.cleared.includes(currentLevel)){
           save.cleared.push(currentLevel);
           save.xp+=25;
-          save.unlocked=Math.max(save.unlocked,Math.min(5,currentLevel+2));
+          save.unlocked=Math.max(save.unlocked,Math.min(CAMPAIGN_LEVELS,currentLevel+2));
           persist();
         }
         addLog("关卡目标完成。山路已向前展开。","good");
@@ -635,6 +768,7 @@
     }
     function startAuto(){
       if(game.auto){stopAuto();render();return;}
+      if(game.won)return;
       game.auto=true;render();
       autoTimer=setInterval(function(){
         if(!game||game.won){stopAuto();render();return;}
@@ -643,7 +777,54 @@
         const chosen=ready[autoCursor%ready.length];
         autoCursor+=1;
         stepActor(chosen.id,true);
-      },680);
+      },autoDelays[autoSpeed]);
+    }
+    function undoStep(){
+      stopAuto();
+      if(!undoStack.length){render();return;}
+      game=undoStack.pop();
+      game.auto=false;
+      render();
+    }
+    function cycleSpeed(){
+      autoSpeed=(autoSpeed+1)%autoDelays.length;
+      if(game.auto){stopAuto();startAuto();}
+      else render();
+    }
+    function showModal(title,body,actions){
+      const root=document.getElementById("modal-root");
+      root.innerHTML='<div class="locked-overlay" data-action="modal-backdrop"><section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">'
+        +'<button class="modal-close" data-action="modal-close" aria-label="关闭">×</button><div class="modal-mark">✦</div><h2 id="modal-title">'+esc(title)+'</h2>'
+        +'<div class="modal-body">'+body+'</div><div class="modal-actions">'+(actions||'<button class="control-btn primary" data-action="modal-close">知道了</button>')+'</div></section></div>';
+    }
+    function closeModal(){document.getElementById("modal-root").innerHTML="";}
+    function openGuide(){
+      showModal("并发山谷 · 操作图鉴",'<h3>怎么控制进程</h3><ul><li>点角色卡片上的「执行一步」，你就是调度器；每次只执行一个 P、V 或临界区动作。</li><li>点「自动轮转」观察系统调度；速度按钮可切换慢速、标准和快速。</li><li>点「撤销一步」回到上一次操作前，重置会保留已解锁关卡。</li></ul><h3>本游戏中的规则</h3><ul><li><code>P(S)</code>：S 大于 0 时减 1 并继续；S 为 0 时进程进入等待队列。</li><li><code>V(S)</code>：唤醒等待队首；若无人等待，S 加 1。</li><li>互斥锁保护临界区；计数信号量表示可用资源数量。</li><li>死锁观察关会让你先亲手制造等待环，再通过改变资源申请顺序恢复运行。</li></ul><p class="modal-footnote">进度和修炼值保存在当前浏览器中。刷新页面不会丢关卡解锁。</p>');
+    }
+    function openHint(){
+      const queues=Object.keys(game.waiters).map(function(key){const list=game.waiters[key]||[];return list.length?semName(key)+"："+list.map(function(id){const actor=game.actors.find(function(item){return item.id===id;});return actor?actor.name.split(" · ")[0]:id;}).join("、"):"";}).filter(Boolean);
+      const queueText=queues.length?queues.map(function(item){return "<li>"+esc(item)+"</li>";}).join(""):"<li>当前没有等待进程。</li>";
+      showModal(game.config.title+" · 本关讲解",'<h3>场景目标</h3><p>'+esc(game.config.objective)+"</p><h3>关键原理</h3><p>"+esc(game.config.lesson)+"</p><h3>此刻的等待队列</h3><ul>"+queueText+"</ul><p class=\"modal-footnote\">提示：观察信号量变化、角色状态和资源持有者，再决定下一步调度。</p>");
+    }
+    function openSandbox(){
+      const capacity=sandboxSettings.capacity,stockOptions=Array.from(new Set([0,1,capacity]));
+      const options=stockOptions.map(function(value){const label=value===0?"空仓":value===capacity?"满仓（"+value+" 件）":value+" 件";return '<option value="'+value+'" '+(value===sandboxSettings.initial?"selected":"")+'>'+label+'</option>';}).join("");
+      const caps=Array.from({length:6},function(_,i){const value=i+1;return '<option value="'+value+'" '+(value===capacity?"selected":"")+'>'+value+' 格</option>';}).join("");
+      const rounds=Array.from({length:5},function(_,i){const value=i+1;return '<option value="'+value+'" '+(value===sandboxSettings.rounds?"selected":"")+'>'+value+' 轮</option>';}).join("");
+      const body='<p>改几项参数，直接进入可操作的生产者 / 消费者模拟。参数保存在本机，下次还能接着试。</p><div class="sandbox-form"><label class="sandbox-field"><span>缓冲区容量</span><select id="sandbox-capacity" data-action="sandbox-capacity">'+caps+'</select></label><label class="sandbox-field"><span>生产与搬运轮数</span><select id="sandbox-rounds">'+rounds+'</select></label><label class="sandbox-field"><span>初始库存</span><select id="sandbox-initial">'+options+'</select></label></div><p class="modal-footnote">满仓开局再切到「危险申请」，可以观察持锁等待；自由沙盘不影响关卡解锁。</p>';
+      showModal("配置自由沙盘",body,'<button class="control-btn" data-action="modal-close">先不玩</button><button class="control-btn primary" data-action="sandbox-start">进入沙盘 →</button>');
+      document.getElementById("sandbox-capacity").addEventListener("change",function(){
+        const oldInitial=Number(document.getElementById("sandbox-initial").value),cap=Number(this.value);
+        const values=Array.from(new Set([0,1,cap]));
+        document.getElementById("sandbox-initial").innerHTML=values.map(function(value){return '<option value="'+value+'">'+(value===0?"空仓":value===cap?"满仓（"+value+" 件）":value+" 件")+'</option>';}).join("");
+        document.getElementById("sandbox-initial").value=values.includes(oldInitial)&&oldInitial<=cap?oldInitial:0;
+      });
+    }
+    function beginSandbox(){
+      sandboxSettings.capacity=Number(document.getElementById("sandbox-capacity").value);
+      sandboxSettings.rounds=Number(document.getElementById("sandbox-rounds").value);
+      sandboxSettings.initial=Math.min(Number(document.getElementById("sandbox-initial").value),sandboxSettings.capacity);
+      persistSandboxSettings();closeModal();createGame(SANDBOX_INDEX,"safe",false);
     }
     function renderMap(){
       const root=document.getElementById("stage-list");
@@ -658,13 +839,27 @@
     }
     function renderModeBar(){
       const root=document.getElementById("mode-bar");
-      if(currentLevel!==1){root.innerHTML="";return;}
-      root.innerHTML='<button class="control-btn '+(game.mode==="danger"?"active":"")+'" data-action="mode" data-mode="danger">⚠ 危险次序</button>'
-        +'<button class="control-btn '+(game.mode==="safe"?"active":"")+'" data-action="mode" data-mode="safe">✦ 安全次序</button>'
-        +'<span class="tip-chip">先体验锁内等待，再切安全次序</span>';
+      if(currentLevel!==1&&currentLevel!==6&&currentLevel!==SANDBOX_INDEX){root.innerHTML="";return;}
+      const philosopher=currentLevel===6;
+      root.innerHTML='<button class="control-btn '+(game.mode==="danger"?"active":"")+'" data-action="mode" data-mode="danger">⚠ '+(philosopher?"先拿左叉":"危险申请")+'</button>'
+        +'<button class="control-btn '+(game.mode==="safe"?"active":"")+'" data-action="mode" data-mode="safe">✦ '+(philosopher?"按叉号申请":"安全申请")+'</button>'
+        +'<span class="tip-chip">'+(philosopher?"全员同序取资源，可打破环形等待":"先体验等待，再切安全次序")+'</span>';
     }
     function renderBuffer(){
       const grid=document.getElementById("buffer-grid");
+      const title=document.getElementById("resource-title");
+      title.textContent=game.config.resourceTitle||"共享资源 · 缓冲区";
+      if(game.config.resourceView==="forks"){
+        const keys=Object.keys(game.sem).filter(function(key){return /^fork\d+$/.test(key);});
+        const labelByActor={};
+        game.actors.forEach(function(actor){labelByActor[actor.id]=actor.name.split(" ")[1]||actor.name;});
+        grid.innerHTML='<div class="fork-table">'+keys.map(function(key){
+          const owner=game.owners[key];
+          return '<div class="fork-token '+(owner?"held":"")+'">'+(owner?"✊":"🥢")+'<small>'+key.replace("fork","")+" 号"+(owner?" · "+esc(labelByActor[owner]||"占用"):" · 空闲")+'</small></div>';
+        }).join("")+'</div>';
+        document.getElementById("buffer-count").textContent=(keys.length-keys.filter(function(key){return game.sem[key]===1;}).length)+" / "+keys.length+" 把已占用";
+        return;
+      }
       const total=game.config.capacity;
       grid.innerHTML=Array.from({length:total},function(_,index){
         const item=game.buffer[index];
@@ -675,13 +870,20 @@
       document.getElementById("buffer-count").textContent=game.buffer.length+" / "+total+" 件";
     }
     function renderSemaphores(){
-      const labels={empty:"可放入的空位",full:"可取出的货物",mutex:"共享区互斥",bufferLock:"单次访问锁",batchLock:"整批消费者锁",dataReady:"数据就绪通知"};
+      const labels={empty:"可放入的空位",full:"可取出的货物",mutex:"共享区互斥",bufferLock:"单次访问锁",batchLock:"整批消费者锁",dataReady:"数据就绪通知",readerSeats:"可并行阅览席"};
       document.getElementById("semaphore-row").innerHTML=Object.keys(game.sem).map(function(key){
-        return '<div class="sem-card '+(lastSemFlash===key?"changed":"")+'"><div class="sem-top"><code>'+key+'</code><span>'+labels[key]+'</span></div><div class="sem-value"><strong>'+game.sem[key]+'</strong><span>当前值</span></div></div>';
+        const owner=game.owners[key];
+        const ownerActor=owner?game.actors.find(function(actor){return actor.id===owner;}):null;
+        const ownerName=ownerActor?ownerActor.name:"空闲";
+        const waiters=(game.waiters[key]||[]).map(function(id){const actor=game.actors.find(function(item){return item.id===id;});return actor?actor.name.split(" · ")[0]:id;});
+        const meta=key==="readerSeats"?"已占用 <b>"+(game.config.sem[key]-game.sem[key])+"</b> 张席":"持有者 <b>"+esc(ownerName)+"</b>";
+        return '<div class="sem-card '+(lastSemFlash===key?"changed":"")+'"><div class="sem-top"><code>'+esc(key)+'</code><span>'+esc(labels[key]||semName(key))+'</span></div><div class="sem-value"><strong>'+game.sem[key]+'</strong><span>可用</span></div><div class="sem-meta"><span>'+meta+'</span><span>等待队列 <b>'+esc(waiters.length?waiters.join(" → "):"空")+'</b></span></div></div>';
       }).join("");
     }
     function renderActors(){
-      document.getElementById("actor-list").innerHTML=game.actors.map(function(actor){
+      const root=document.getElementById("actor-list");
+      root.classList.toggle("philosopher-list",currentLevel===6);
+      root.innerHTML=game.actors.map(function(actor){
         const op=nextOp(actor);
         const code=op?opCode(op):"本段已完成";
         const disabled=actor.status!=="ready"||game.won;
@@ -711,7 +913,8 @@
     function renderBanner(){
       const root=document.getElementById("status-banner");
       if(game.deadlock){
-        root.innerHTML='<div class="deadlock-banner"><span class="banner-icon">⛓</span><span><b>死锁出现了。</b> 生产者持有 mutex 等 empty，消费者又等 mutex；所有人都停在等待队列。点“安全次序”重开，让消费者先腾出位置。</span></div>';
+        const detail=currentLevel===6?"五位侠客各自拿着一把叉，又都等下一把，形成环形等待。切换到按叉号申请后重开。":"生产者持有 mutex 等空位，消费者又等 mutex；所有人都停在等待队列。切到安全申请后重开。";
+        root.innerHTML='<div class="deadlock-banner"><span class="banner-icon">⛓</span><span><b>死锁出现了。</b> '+detail+'</span></div>';
       }else if(game.won){
         root.innerHTML='<div class="win-banner"><span class="banner-icon">✦</span><span><b>这一段走通啦。</b> '+(currentLevel===0?"你已经亲手让 empty、full 与 mutex 配合起来。":"操作轨迹和资源变化都已记录，继续向前探索下一个同步场景。")+'</span></div>';
       }else{
@@ -720,28 +923,42 @@
     }
     function render(){
       if(!game)return;
-      document.getElementById("stage-kicker").textContent="并发山谷 · 第 "+(currentLevel+1)+" 关 · "+game.config.tag;
+      document.getElementById("stage-kicker").textContent=(currentLevel===SANDBOX_INDEX?"并发山谷 · 自由沙盘 · ":"并发山谷 · 第 "+(currentLevel+1)+" 关 · ")+game.config.tag;
       document.getElementById("stage-title").textContent=game.config.title;
       document.getElementById("stage-desc").textContent=game.config.desc;
-      document.getElementById("level-badge").textContent=save.cleared.includes(currentLevel)?"已通关 · 可重玩":"动画调度中";
+      document.getElementById("level-badge").textContent=currentLevel===SANDBOX_INDEX?"自由实验 · 可重玩":save.cleared.includes(currentLevel)?"已通关 · 可重玩":"动画调度中";
       document.getElementById("xp").textContent=save.xp;
-      document.getElementById("progress").textContent=save.unlocked+" / 5";
+      document.getElementById("progress").textContent=save.unlocked+" / "+CAMPAIGN_LEVELS;
       document.getElementById("lesson-tag").textContent=game.lastLesson?"刚刚发生":"本关知识点";
       document.getElementById("journal").innerHTML="<b>"+(game.lastLesson?"动作释义":"本关原理")+"：</b> "+esc(game.lastLesson||game.config.lesson);
-      document.getElementById("chips").innerHTML=(currentLevel===2?'<span class="tip-chip">整批锁 batchLock</span><span class="tip-chip">单次锁 bufferLock</span>':currentLevel===3?'<span class="tip-chip">同步 dataReady</span><span class="tip-chip">一次写、一次读</span>':currentLevel===4?'<span class="tip-chip">互斥 mutex</span><span class="tip-chip">同一临界区</span>':'<span class="tip-chip">手动调度</span><span class="tip-chip">实时看 PV</span>');
+      const chipSets={2:'<span class="tip-chip">整批锁 batchLock</span><span class="tip-chip">单次锁 bufferLock</span>',3:'<span class="tip-chip">同步 dataReady</span><span class="tip-chip">一次写、一次读</span>',4:'<span class="tip-chip">互斥 mutex</span><span class="tip-chip">同一临界区</span>',5:'<span class="tip-chip">并行读</span><span class="tip-chip">独占写</span>',6:'<span class="tip-chip">循环等待</span><span class="tip-chip">资源排序</span>',7:'<span class="tip-chip">自定义容量</span><span class="tip-chip">撤销与试错</span>'};
+      document.getElementById("chips").innerHTML=chipSets[currentLevel]||'<span class="tip-chip">手动调度</span><span class="tip-chip">实时看 PV</span>';
       document.getElementById("auto-btn").textContent=game.auto?"Ⅱ 暂停轮转":"▶ 自动轮转";
       document.getElementById("auto-btn").classList.toggle("active",game.auto);
+      document.getElementById("auto-btn").disabled=game.won;
+      document.getElementById("speed-btn").textContent="速度 "+["0.5×","1×","1.8×"][autoSpeed];
+      document.getElementById("undo-btn").disabled=!undoStack.length;
       const next=document.getElementById("next-btn");
-      next.hidden=!(game.won&&currentLevel<4&&currentLevel+1<save.unlocked);
+      next.hidden=!(game.won&&currentLevel<CAMPAIGN_LEVELS-1&&currentLevel+1<save.unlocked);
       renderMap();renderModeBar();renderGoal();renderBuffer();renderSemaphores();renderActors();renderLogs();renderBanner();
     }
     document.addEventListener("click",function(event){
       const button=event.target.closest("[data-action]");
       if(!button)return;
       const action=button.dataset.action;
+      if(action==="modal-backdrop"){
+        if(event.target===button)closeModal();
+        return;
+      }
+      if(action==="modal-close"){closeModal();return;}
+      if(action==="guide"){openGuide();return;}
+      if(action==="sandbox-open"){openSandbox();return;}
+      if(action==="sandbox-start"){beginSandbox();return;}
+      if(action==="undo"){undoStep();return;}
+      if(action==="speed"){cycleSpeed();return;}
       if(action==="stage"){
         const index=Number(button.dataset.index);
-        if(index<save.unlocked)createGame(index,index===1?"danger":"safe",false);
+        if(index<save.unlocked)createGame(index,(index===1||index===6)?"danger":"safe",false);
       }else if(action==="step"){
         stepActor(button.dataset.id,false);
       }else if(action==="auto"){
@@ -752,13 +969,12 @@
         const seen=game.seenDeadlock;
         createGame(currentLevel,button.dataset.mode,seen);
       }else if(action==="next"){
-        if(currentLevel+1<save.unlocked)createGame(currentLevel+1,currentLevel+1===1?"danger":"safe",false);
+        if(currentLevel+1<save.unlocked)createGame(currentLevel+1,(currentLevel+1===1||currentLevel+1===6)?"danger":"safe",false);
       }else if(action==="hint"){
-        game.lastLesson=game.config.lesson;
-        addLog("打开了本关札记。结合当前进程位置观察关键的 P/V。","info");
-        render();
+        openHint();
       }
     });
+    document.addEventListener("keydown",function(event){if(event.key==="Escape")closeModal();});
     createGame(0,"safe",false);
   </script>
 </body>
