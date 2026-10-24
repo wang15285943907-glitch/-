@@ -76,6 +76,32 @@
     .world-hud span{display:inline-flex;align-items:center;gap:6px;max-width:70%;padding:6px 9px;border:1px solid #d6f2dd20;border-radius:999px;background:#071c20a8;color:#c5e3d1;font-size:8px;font-weight:750;letter-spacing:.03em;box-shadow:0 5px 16px #0003;backdrop-filter:blur(9px)}
     .world-hud span:last-child{color:#e8d29c}
     .world-prompt{position:absolute;right:12px;bottom:10px;z-index:1;color:#d0e5d5a8;font-size:8px;text-shadow:0 2px 8px #000;pointer-events:none}
+    .code-studio{margin:0 0 13px;padding:13px;border:1px solid rgba(185,223,202,.2);border-radius:17px;background:linear-gradient(145deg,rgba(5,24,30,.78),rgba(11,41,46,.78));box-shadow:inset 0 1px #ffffff0b,0 12px 24px #0002}
+    .code-studio-head{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:9px}
+    .code-studio-title{color:#d9ebdc;font-size:10px;font-weight:900}
+    .code-studio-title small{display:block;margin-top:2px;color:#8eaaa0;font-size:8px;font-weight:500}
+    .code-status{padding:5px 8px;border:1px solid #ffffff17;border-radius:99px;color:#a7c6b7;font-size:8px;white-space:nowrap}
+    .code-status.ok{border-color:#8fd4ad55;color:#b9edc9}.code-status.error{border-color:#ef9d8b66;color:#ffc0ae}.code-status.dirty{border-color:#e5c27a55;color:#f0d79c}
+    .code-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+    .code-tabs{display:flex;gap:5px;overflow:auto;min-width:0}
+    .code-tab{flex:0 0 auto;padding:6px 9px;border:1px solid #d3e8d41c;border-radius:9px;background:#071a1eaa;color:#91aea0;font-size:8px;font-weight:750;cursor:pointer}
+    .code-tab.active{border-color:#8dd4aa70;background:linear-gradient(120deg,#285d4a,#1d5260);color:#e3f2e4}
+    .code-compile{flex:0 0 auto;padding:7px 11px;border:1px solid #b5e0be66;border-radius:9px;background:linear-gradient(115deg,#75c69a,#a8d9ae);color:#0a302b;font-size:8px;font-weight:900;cursor:pointer;box-shadow:0 5px 14px #0003}
+    .code-compile:hover{filter:brightness(1.08);transform:translateY(-1px)}
+    .code-editor-frame{position:relative;height:176px;overflow:hidden;border:1px solid #d0e6d51e;border-radius:12px;background:linear-gradient(120deg,#06161bcf,#0a2229dc);box-shadow:inset 0 6px 18px #0003}
+    .code-highlight,.code-editor{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0;padding:11px 12px 14px 47px;font:10px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:0;tab-size:2;white-space:pre;overflow:auto}
+    .code-highlight{counter-reset:line;color:#c0d9cb;pointer-events:none}
+    .code-row{position:relative;display:block;min-width:max-content;padding-right:14px}
+    .code-row::before{position:absolute;left:-35px;width:24px;color:#53736a;text-align:right;counter-increment:line;content:counter(line)}
+    .code-row.active{background:linear-gradient(90deg,#9ad7a919,#80bad01b,transparent);box-shadow:inset 2px 0 #a4dfad}
+    .code-row.error{background:linear-gradient(90deg,#e87b6730,transparent);box-shadow:inset 2px 0 #f19382}
+    .code-keyword{color:#8fd9b4;font-weight:800}.code-sem{color:#f0ce8e}.code-function{color:#99cee0}.code-comment{color:#708e81}
+    .code-editor{resize:none;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:#f4d894;outline:none;scrollbar-color:#54766c #07191d;scrollbar-width:thin}
+    .code-editor::selection{background:#81cfa74c;color:transparent}
+    .code-feedback{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;color:#91ada1;font-size:8px;line-height:1.6}
+    .code-feedback.error{color:#ffc0ae}.code-feedback.ok{color:#bce9c7}
+    .code-current{color:#e6d7a5;font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace}
+    .code-help{margin-top:5px;color:#708d82;font-size:7.5px;line-height:1.55}
     .buffer-deck{position:relative;margin:5px 0 12px;padding:13px 14px 15px;border:1px solid rgba(187,226,208,.18);border-radius:17px;background:linear-gradient(145deg,rgba(5,25,31,.63),rgba(15,52,58,.55));box-shadow:inset 0 1px #ffffff0d,0 11px 24px #0002}
     .deck-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .deck-head strong{color:#d6e9dc;font-size:10px}
@@ -200,6 +226,7 @@
       .world-stage{height:235px;margin-bottom:10px}
       .world-hud{inset:8px 8px auto}
       .world-hud span{padding:5px 7px;font-size:7px}
+      .code-studio{padding:9px}.code-toolbar{align-items:flex-end}.code-compile{padding:7px 8px}.code-editor-frame{height:155px}
       .objective-progress{flex-direction:column;align-items:flex-end;gap:4px}
       .progress-track{width:72px}
       .buffer-deck{padding:10px}
@@ -269,6 +296,13 @@
               <div class="objective-progress"><span id="goal-count">0 / 3</span><span class="progress-track"><span class="progress-fill" id="goal-fill" style="width:0%"></span></span></div>
             </div>
             <div id="mode-bar" class="mode-bar"></div>
+            <section class="code-studio" aria-label="同步代码实战">
+              <div class="code-studio-head"><div class="code-studio-title">写代码，跑进山谷<small>改写进程程序，再编译成真正的 P / V 调度步骤</small></div><span class="code-status" id="code-status">示例程序</span></div>
+              <div class="code-toolbar"><div class="code-tabs" id="code-tabs" role="tablist" aria-label="选择要编辑的进程"></div><button class="code-compile" id="code-compile" data-action="compile-code">编译并重开 ▶</button></div>
+              <div class="code-editor-frame"><pre class="code-highlight" id="code-highlight" aria-hidden="true"></pre><textarea class="code-editor" id="code-editor" aria-label="当前进程的 P/V 同步程序" autocomplete="off" autocapitalize="off" spellcheck="false" wrap="off"></textarea></div>
+              <div class="code-feedback" id="code-feedback"><span>编辑这段程序后编译，模拟器会按你的代码执行。</span><span class="code-current" id="code-current"></span></div>
+              <div class="code-help">支持 P(信号量)、V(信号量)、buffer.put / buffer.get、read / write / modify / eat 和 for 循环；这是用于同步练习的 C 风格代码，不是通用 C 编译器。</div>
+            </section>
             <div class="world-stage" id="world-stage">
               <canvas id="world-canvas" role="group" aria-label="可点击调度的实时并发山谷场景"></canvas>
               <div class="world-hud"><span id="world-caption">云岭驿道 · 场景实时演算</span><span id="world-state">进程待命</span></div>
@@ -335,6 +369,12 @@
     let worldLastFrame=0;
     let worldHitTargets=[];
     const worldSprites=new Map();
+    let codeDrafts={};
+    let selectedCodeActor="";
+    let codeIssue=null;
+    let codeStatusText="示例程序";
+    let codeStatusType="";
+    let codeDirty=false;
 
     function loadSave(){
       try{
@@ -519,18 +559,118 @@
         };
       }
     }
-    function createGame(index,mode,preserveDeadlock){
+    function codeForOperation(op){
+      if(op.kind==="P"||op.kind==="V")return op.kind+"("+op.key+");";
+      return {put:"buffer.put(goods[i]);",get:"buffer.get();",write:"write(data);",read:"read(data);",readShared:"readShared(sharedData);",modify:"modify(sharedData);",eat:"eat();"}[op.kind]||"";
+    }
+    function defaultProgram(spec,index,mode){
+      const id=spec.id;
+      if(index===0||index===1||index===SANDBOX_INDEX){
+        const count=Math.max(1,Math.floor(spec.ops.length/5));
+        const producer=id==="producer";
+        const body=producer
+          ?(mode==="danger"&&index!==0?["P(mutex); // 先拿锁，再等空位","P(empty);","buffer.put(goods[i]); // 写入共享缓冲区","V(mutex);","V(full); // 通知消费者"]:["P(empty); // 先预约空位","P(mutex); // 进入临界区","buffer.put(goods[i]); // 写入共享缓冲区","V(mutex); // 离开临界区","V(full); // 通知消费者"])
+          :["P(full); // 等待一件货物","P(mutex); // 进入临界区","buffer.get(); // 取出货物","V(mutex); // 离开临界区","V(empty); // 归还空位"];
+        if(count===1)return body.join("\n");
+        return "for (int i = 0; i < "+count+"; i++) {\n"+body.map(function(line){return "  "+line;}).join("\n")+"\n}";
+      }
+      if(index===2)return ["P(batchLock); // 一次取得整批资格","for (int i = 0; i < 3; i++) {","  P(full);","  P(bufferLock);","  buffer.get();","  V(bufferLock);","  V(empty);","}","V(batchLock); // 整批取完后释放"].join("\n");
+      if(index===3)return id==="writer"?["write(data); // 写入单格数据舱","V(dataReady); // 通知读手数据已就绪"].join("\n"):["P(dataReady); // 等待写手通知","read(data); // 读取数据"].join("\n");
+      if(index===4)return ["P(mutex); // 进入共享数据临界区","modify(sharedData); // 修改地图","V(mutex); // 释放互斥锁"].join("\n");
+      if(index===5){
+        if(id==="writer")return ["P(readerSeats); // 取得两张席，阻止并行读","P(readerSeats);","modify(sharedData); // 独占修改卷宗","V(readerSeats);","V(readerSeats); // 归还两张席"].join("\n");
+        return ["P(readerSeats); // 占一张阅览席","readShared(sharedData); // 只读，可与其他读者并行","V(readerSeats); // 归还阅览席"].join("\n");
+      }
+      if(index===6){
+        const seat=Number(id.replace("philosopher","")),left=seat+1,right=(seat+1)%5+1;
+        const first=mode==="safe"?Math.min(left,right):left,second=mode==="safe"?Math.max(left,right):right;
+        return ["P(fork"+first+"); // 申请第一把玉叉","P(fork"+second+"); // 再申请第二把","eat(); // 两把都拿到才开饭","V(fork"+second+");","V(fork"+first+");"].join("\n");
+      }
+      return spec.ops.map(codeForOperation).filter(Boolean).join("\n");
+    }
+    function compileSource(source,semKeys){
+      const lines=String(source||"").replace(/\r/g,"").split("\n"),errors=[];
+      function parseRange(start,end){
+        const ops=[];
+        for(let i=start;i<end;i++){
+          const raw=lines[i],clean=raw.replace(/\/\/.*$/,""),trim=clean.trim();
+          if(!trim)continue;
+          const loop=trim.match(/^for\s*\(\s*(?:int\s+)?([A-Za-z_]\w*)\s*=\s*(\d+)\s*;\s*\1\s*<\s*(\d+)\s*;\s*\1\s*(?:\+\+|\+=\s*1)\s*\)\s*\{\s*$/);
+          if(loop){
+            const first=Number(loop[2]),limit=Number(loop[3]),times=limit-first;
+            if(times<0||times>12){errors.push({line:i+1,text:"循环次数需在 0 到 12 之间。"});return ops;}
+            let depth=1,j=i+1;
+            for(;j<end;j++){
+              const nested=lines[j].replace(/\/\/.*$/g,"");
+              for(let k=0;k<nested.length;k++){if(nested[k]==="{")depth++;else if(nested[k]==="}")depth--;}
+              if(depth===0)break;
+            }
+            if(depth!==0){errors.push({line:i+1,text:"for 循环少了右大括号 }。"});return ops;}
+            const body=parseRange(i+1,j);
+            for(let n=0;n<times;n++)body.forEach(function(op){ops.push(Object.assign({},op));});
+            i=j;continue;
+          }
+          if(trim==="}"||trim==="{"){errors.push({line:i+1,text:"大括号需要配对在 for 循环里。"});continue;}
+          const matcher=/\b(P|wait|V|signal|buffer\.put|buffer\.get|put|get|write|read|readShared|modify|eat)\s*\(([^()]*)\)\s*;/g;
+          let match,found=0,residue=clean;
+          while((match=matcher.exec(clean))){
+            found++;residue=residue.replace(match[0],"");
+            const fn=match[1],arg=match[2].trim();let op;
+            if(fn==="P"||fn==="wait"||fn==="V"||fn==="signal"){
+              const key=arg.replace(/^[&*]\s*/,"");
+              if(!/^[A-Za-z_]\w*$/.test(key)){errors.push({line:i+1,text:"P / V 里写一个信号量名，例如 P(empty);"});continue;}
+              if(!semKeys.includes(key)){errors.push({line:i+1,text:"本关没有名为 "+key+" 的信号量。"});continue;}
+              op={kind:(fn==="P"||fn==="wait")?"P":"V",key:key};
+            }else{
+              const kind=fn==="buffer.put"||fn==="put"?"put":fn==="buffer.get"||fn==="get"?"get":fn;
+              op={kind:kind};
+            }
+            if(op)ops.push({op:op,line:i+1});
+          }
+          const extra=residue.replace(/[{};]/g,"").trim();
+          if(!found)errors.push({line:i+1,text:"这行还不会执行。试试 P(...);、V(...); 或 buffer.put / buffer.get。"});
+          else if(extra)errors.push({line:i+1,text:"每行只写支持的同步语句；暂不支持这一段："+extra.slice(0,30)});
+          if(ops.length>300){errors.push({line:i+1,text:"步骤太多，请把循环控制在 12 轮以内。"});return ops;}
+        }
+        return ops;
+      }
+      const flat=parseRange(0,lines.length);
+      if(!flat.length&&!errors.length)errors.push({line:1,text:"程序里还没有可执行的同步操作。"});
+      return {ok:errors.length===0,ops:flat.map(function(item){return item.op;}),sourceLines:flat.map(function(item){return item.line;}),errors:errors};
+    }
+    function inferProgramMode(index,programs,fallback){
+      if(index===1||index===SANDBOX_INDEX){
+        const ops=programs.producer&&programs.producer.ops||[];
+        const first=ops.findIndex(function(op){return op.kind==="P";}),empty=ops.findIndex(function(op){return op.kind==="P"&&op.key==="empty";}),mutex=ops.findIndex(function(op){return op.kind==="P"&&op.key==="mutex";});
+        if(empty>=0&&mutex>=0)return empty<mutex?"safe":"danger";
+      }
+      if(index===6){
+        const people=Object.keys(programs).filter(function(id){return id.indexOf("philosopher")===0;});
+        if(people.length){const ordered=people.every(function(id){const forks=(programs[id].ops||[]).filter(function(op){return op.kind==="P"&&/^fork\d+$/.test(op.key);}).slice(0,2);return forks.length===2&&Number(forks[0].key.slice(4))<Number(forks[1].key.slice(4));});return ordered?"safe":"danger";}
+      }
+      return fallback;
+    }
+    function createGame(index,mode,preserveDeadlock,compiledPrograms){
       stopAuto();
       currentLevel=index;
       undoStack=[];autoCursor=0;
       worldSprites.clear();worldHitTargets=[];
       const defaultMode=(index===1||index===6)?"danger":"safe";
-      const config=levelConfig(index,mode || defaultMode);
+      const chosenMode=mode||defaultMode;
+      const config=levelConfig(index,chosenMode);
+      const actorPrograms=config.actors.map(function(spec){
+        const supplied=compiledPrograms&&compiledPrograms[spec.id],source=supplied?supplied.source:defaultProgram(spec,index,chosenMode);
+        const parsed=supplied?supplied:compileSource(source,Object.keys(config.sem));
+        return Object.assign({},spec,{ops:parsed.ok?parsed.ops:spec.ops,source:source,sourceLines:parsed.ok?parsed.sourceLines:spec.ops.map(function(_,i){return i+1;})});
+      });
+      codeDrafts={};selectedCodeActor=actorPrograms.length?actorPrograms[0].id:"";codeIssue=null;codeDirty=false;
+      actorPrograms.forEach(function(spec){codeDrafts[spec.id]=spec.source;});
+      codeStatusText=compiledPrograms?"已编译 · "+actorPrograms.reduce(function(total,spec){return total+spec.ops.length;},0)+" 步":"示例程序";codeStatusType=compiledPrograms?"ok":"";
       game={
         config:config,mode:mode || defaultMode,
         sem:Object.assign({},config.sem),
         buffer:config.initial.map(function(item){return {label:item};}),
-        actors:config.actors.map(function(spec){return Object.assign({},spec,{pc:0,status:"ready",blockedOn:"",place:0,gets:0});}),
+        actors:actorPrograms.map(function(spec){return Object.assign({},spec,{pc:0,status:"ready",blockedOn:"",place:0,gets:0});}),
         waiters:{},owners:{},logs:[],made:0,delivered:0,read:0,modified:0,batches:0,eaten:0,
         seenDeadlock:Boolean(preserveDeadlock),deadlock:false,won:false,auto:false,
         lastLesson:"",settledDeliveries:0,lastAction:null
@@ -858,9 +998,9 @@
       const root=document.getElementById("mode-bar");
       if(currentLevel!==1&&currentLevel!==6&&currentLevel!==SANDBOX_INDEX){root.innerHTML="";return;}
       const philosopher=currentLevel===6;
-      root.innerHTML='<button class="control-btn '+(game.mode==="danger"?"active":"")+'" data-action="mode" data-mode="danger">⚠ '+(philosopher?"先拿左叉":"危险申请")+'</button>'
-        +'<button class="control-btn '+(game.mode==="safe"?"active":"")+'" data-action="mode" data-mode="safe">✦ '+(philosopher?"按叉号申请":"安全申请")+'</button>'
-        +'<span class="tip-chip">'+(philosopher?"全员同序取资源，可打破环形等待":"先体验等待，再切安全次序")+'</span>';
+      root.innerHTML='<button class="control-btn '+(game.mode==="danger"?"active":"")+'" data-action="mode" data-mode="danger">⚠ '+(philosopher?"危险代码模板":"危险顺序模板")+'</button>'
+        +'<button class="control-btn '+(game.mode==="safe"?"active":"")+'" data-action="mode" data-mode="safe">✦ '+(philosopher?"资源排序模板":"安全顺序模板")+'</button>'
+        +'<span class="tip-chip">载入示例后可自行改代码，再编译运行</span>';
     }
     function renderBuffer(){
       const grid=document.getElementById("buffer-grid");
@@ -1075,18 +1215,71 @@
         const loop=function(now){drawWorld(now);requestAnimationFrame(loop);};requestAnimationFrame(loop);
       }
     }
+    function highlightCodeLine(line){
+      const cut=line.indexOf("//"),plain=cut>=0?line.slice(0,cut):line,comment=cut>=0?line.slice(cut):"";
+      let html=esc(plain).replace(/\b(for|int|while|return)\b/g,'<span class="code-keyword">$1</span>')
+        .replace(/\b(P|V|wait|signal)\b/g,'<span class="code-keyword">$1</span>')
+        .replace(/\b(buffer\.(?:put|get)|readShared|read|write|modify|eat)\b/g,'<span class="code-function">$1</span>')
+        .replace(/\b(empty|full|mutex|bufferLock|batchLock|dataReady|readerSeats|fork\d+)\b/g,'<span class="code-sem">$1</span>');
+      if(comment)html+='<span class="code-comment">'+esc(comment)+'</span>';
+      return html||" ";
+    }
+    function renderCodeStudio(){
+      const tabs=document.getElementById("code-tabs"),editor=document.getElementById("code-editor"),mirror=document.getElementById("code-highlight");
+      if(!tabs||!editor||!mirror||!game)return;
+      if(!game.actors.some(function(actor){return actor.id===selectedCodeActor;}))selectedCodeActor=game.actors[0]?game.actors[0].id:"";
+      const actor=game.actors.find(function(item){return item.id===selectedCodeActor;});
+      tabs.innerHTML=game.actors.map(function(item){return '<button class="code-tab '+(item.id===selectedCodeActor?"active":"")+'" role="tab" aria-selected="'+(item.id===selectedCodeActor)+ '" data-action="code-actor" data-id="'+item.id+'">'+esc(item.name.split(" · ")[0])+'</button>';}).join("");
+      const source=codeDrafts[selectedCodeActor]||"";
+      if(editor.value!==source)editor.value=source;
+      const sourceLine=actor&&actor.sourceLines?actor.sourceLines[actor.pc]||actor.sourceLines[actor.sourceLines.length-1]:0;
+      const issue=codeIssue&&codeIssue.actorId===selectedCodeActor?codeIssue:null;
+      const activeLine=codeDirty?0:sourceLine;
+      mirror.innerHTML=source.split("\n").map(function(line,index){const number=index+1,cls=(number===activeLine?" active":"")+(issue&&number===issue.line?" error":"");return '<span class="code-row'+cls+'">'+highlightCodeLine(line)+'</span>';}).join("");
+      mirror.scrollTop=editor.scrollTop;mirror.scrollLeft=editor.scrollLeft;
+      const status=document.getElementById("code-status"),feedback=document.getElementById("code-feedback"),current=document.getElementById("code-current");
+      status.className="code-status"+(codeStatusType?" "+codeStatusType:"");status.textContent=codeDirty?"代码已修改":codeStatusText;
+      feedback.className="code-feedback"+(issue?" error":codeStatusType==="ok"&&!codeDirty?" ok":"");
+      let message=issue?"第 "+issue.line+" 行："+issue.text:codeDirty?"代码已修改；场景还在运行上一版，编译后才会执行新代码。":codeStatusType==="ok"?"编译成功。点场景角色逐条调度，或自动轮转；等待和死锁由这段代码决定。":"改一改示例程序，再编译；每个 P / V 都会进入真实模拟。";
+      feedback.firstElementChild.textContent=message;
+      const op=actor&&!codeDirty?nextOp(actor):null;
+      current.textContent=issue?"修好此行后重新编译":codeDirty?"尚未编译":actor&&actor.status==="done"?"程序执行完成":op&&sourceLine?"当前第 "+sourceLine+" 行 · "+opCode(op):actor&&actor.status==="blocked"?"阻塞于 "+semName(actor.blockedOn):"";
+    }
+    function compileAndRun(){
+      if(!game)return;const programs={},errors=[];
+      game.actors.forEach(function(actor){const source=codeDrafts[actor.id]===undefined?actor.source:codeDrafts[actor.id],parsed=compileSource(source,Object.keys(game.config.sem));
+        if(!parsed.ok)parsed.errors.forEach(function(issue){errors.push({actorId:actor.id,line:issue.line,text:issue.text});});
+        else programs[actor.id]=Object.assign({source:source},parsed);
+      });
+      if(errors.length){codeIssue=errors[0];selectedCodeActor=codeIssue.actorId;codeStatusText="编译失败";codeStatusType="error";renderCodeStudio();return;}
+      const mode=inferProgramMode(currentLevel,programs,game.mode),seen=game.seenDeadlock;
+      createGame(currentLevel,mode,seen,programs);
+      addLog("你的 P / V 程序已编译并载入；接下来由你调度它。","good");render();
+    }
+    function setupCodeEditor(){
+      const editor=document.getElementById("code-editor"),mirror=document.getElementById("code-highlight");if(!editor||!mirror)return;
+      editor.addEventListener("input",function(){if(!selectedCodeActor)return;codeDrafts[selectedCodeActor]=editor.value;codeDirty=true;codeIssue=null;codeStatusType="dirty";codeStatusText="代码已修改";renderCodeStudio();});
+      editor.addEventListener("scroll",function(){mirror.scrollTop=editor.scrollTop;mirror.scrollLeft=editor.scrollLeft;});
+      editor.addEventListener("keydown",function(event){
+        if(event.key==="Tab"){
+          event.preventDefault();const start=editor.selectionStart,end=editor.selectionEnd;editor.setRangeText("  ",start,end,"end");editor.dispatchEvent(new Event("input",{bubbles:true}));
+        }else if((event.ctrlKey||event.metaKey)&&event.key==="Enter"){event.preventDefault();compileAndRun();}
+      });
+    }
     function renderActors(){
       const root=document.getElementById("actor-list");
       root.classList.toggle("philosopher-list",currentLevel===6);
       root.innerHTML=game.actors.map(function(actor){
         const op=nextOp(actor);
         const code=op?opCode(op):"本段已完成";
+        const sourceLine=actor.sourceLines&&actor.sourceLines[actor.pc];
+        const nextText=sourceLine?"第 "+sourceLine+" 行 · "+code:code;
         const disabled=actor.status!=="ready"||game.won;
         const progress=actor.ops.length?Math.min(100,Math.round(actor.pc/actor.ops.length*100)):100;
         return '<article class="actor-card '+actor.status+' '+(lastFlash===actor.id?"active":"")+'">'
           +'<div class="actor-head"><div class="actor-name"><span class="actor-emoji">'+actor.icon+'</span>'+esc(actor.name)+'</div><span class="actor-status">'+esc(actorStatus(actor))+'</span></div>'
           +'<div class="actor-progress" aria-label="进程操作进度"><span style="width:'+progress+'%"></span></div>'
-          +'<div class="actor-footer"><span class="next-op">下一条：<b>'+esc(code)+'</b></span><button class="run-step" data-action="step" data-id="'+actor.id+'" '+(disabled?"disabled":"")+'>执行一步 →</button></div>'
+          +'<div class="actor-footer"><span class="next-op">下一行：<b>'+esc(nextText)+'</b></span><button class="run-step" data-action="step" data-id="'+actor.id+'" '+(disabled?"disabled":"")+'>执行一步 →</button></div>'
           +'</article>';
       }).join("");
     }
@@ -1133,12 +1326,16 @@
       document.getElementById("undo-btn").disabled=!undoStack.length;
       const next=document.getElementById("next-btn");
       next.hidden=!(game.won&&currentLevel<CAMPAIGN_LEVELS-1&&currentLevel+1<save.unlocked);
-      renderMap();renderModeBar();renderGoal();renderBuffer();renderSemaphores();renderActors();renderLogs();renderBanner();updateWorldHud();
+      renderMap();renderModeBar();renderGoal();renderBuffer();renderSemaphores();renderActors();renderCodeStudio();renderLogs();renderBanner();updateWorldHud();
     }
     document.addEventListener("click",function(event){
       const button=event.target.closest("[data-action]");
       if(!button)return;
       const action=button.dataset.action;
+      if(action==="compile-code"){compileAndRun();return;}
+      if(action==="code-actor"){
+        selectedCodeActor=button.dataset.id;codeIssue=null;renderCodeStudio();return;
+      }
       if(action==="modal-backdrop"){
         if(event.target===button)closeModal();
         return;
@@ -1168,6 +1365,7 @@
       }
     });
     document.addEventListener("keydown",function(event){if(event.key==="Escape")closeModal();});
+    setupCodeEditor();
     setupWorldCanvas();
     createGame(0,"safe",false);
   </script>
