@@ -1000,9 +1000,9 @@
     function worldActorPosition(actor,index,count,w,h){
       if(currentLevel===6){const a=-Math.PI/2+index*Math.PI*2/5;return {x:w*.51+Math.cos(a)*Math.min(w*.31,190),y:h*.61+Math.sin(a)*h*.245};}
       const progress=Math.max(0,Math.min(100,Number(actor.place)||0));
-      const x=w*(.15+.7*progress/100),spread=count>1?Math.min(h*.12,26):0;
-      const offset=(index-(count-1)/2)*spread;
-      return {x:x,y:h*.75+offset};
+      const x=w*(.15+.7*progress/100),spread=count>1?Math.min(h*.2,58):0;
+      const offset=(index-(count-1)/2)*spread,laneBase=h*(count>2?.64:.73);
+      return {x:x,y:laneBase+offset};
     }
     function drawActorSprite(actor,index,count,w,h,time){
       const c=worldCtx,target=worldActorPosition(actor,index,count,w,h),old=worldSprites.get(actor.id);
